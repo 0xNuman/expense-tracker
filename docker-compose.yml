@@ -1,0 +1,31 @@
+name: expensetracker
+
+services:
+  postgres:
+    image: docker.io/library/postgres:17-alpine
+    container_name: et-postgres
+    environment:
+      POSTGRES_DB: expensetracker
+      POSTGRES_USER: et
+      POSTGRES_PASSWORD: et
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U et -d expensetracker"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  smtp:
+    image: docker.io/changemakerstudiosus/papercut-smtp:latest
+    container_name: et-papercut
+    ports:
+      - "25:25"      # SMTP from the API
+      - "8081:8080"    # Web UI for viewing captured mail
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

@@ -4,11 +4,13 @@
 Expense Tracker — .NET 10 Minimal API (PostgreSQL + EF Core, Vertical Slice) + React/Vite/Tailwind PWA. REST/HATEOAS (HAL). Phase 1 = MVP. See `docs/requirements/README.md` for full scope and `docs/requirements/phases/phase-1-mvp.md` for current phase.
 
 ## Repo layout
-- `src/ExpenseTracker.Api/` — Minimal API host (Program.cs, Hal/, Endpoints/, Health/).
-- `src/ExpenseTracker.Domain/` — rich domain objects (no EF dependency).
+- `src/ExpenseTracker.Api/` — Minimal API host (Program.cs, Endpoints/, Hal/, Health/, Persistence/).
+- `src/ExpenseTracker.Domain/` — rich domain objects (no EF dependency): IDs, Money, FXRate, User, Tenant, TenantMembership.
+- `src/ExpenseTracker.Infrastructure/` — EF Core DbContext, configurations, value converters, migrations.
+- `tests/ExpenseTracker.Domain.Tests/` — xUnit + FluentAssertions domain invariant tests.
 - `client/` — React + Vite + TS + Tailwind (PWA, mobile-first). HAL consumer in `client/src/hal/`.
+- `docker-compose.yml` — Postgres 17 + Papercut SMTP (podman-compatible).
 - `docs/requirements/` — canonical requirements docs + phase plans.
-- Tests: not yet scaffolded (planned: `tests/ExpenseTracker.Domain.Tests/`, `tests/ExpenseTracker.Api.IntegrationTests/`).
 
 ## Build & run
 - Backend: `dotnet build` from repo root.
@@ -16,20 +18,54 @@ Expense Tracker — .NET 10 Minimal API (PostgreSQL + EF Core, Vertical Slice) +
 - Frontend: `npm --prefix client install` then `npm --prefix client run dev` (Vite on `:5173` proxies `/api` and `/health` to `:5000`).
 - Frontend typecheck/build: `npm --prefix client run build`.
 - Frontend lint: `npm --prefix client run lint` (oxlint).
+- Domain tests: `dotnet test`.
 
-## Testing (once added)
-- `dotnet test` — unit + integration tests with Testcontainers Postgres.
+## Infrastructure (Postgres + Papercut via podman)
+```bash
+podman machine start         # one-time per host boot (macOS)
+podman compose up -d        # starts postgres on :5432 and Papercut on :8081
+podman compose down          # stop
+```
+Connection string: `Host=localhost;Port=5432;Database=expensetracker;Username=et;Password=et`
+Papercut web UI: <http://localhost:8081>
+
+## Migrations
+- Auto-applied on app startup via `MigrationsHostedService` (advisory-locked). Disable via `Persistence:ApplyMigrationsOnStartup=false`.
+- Add a migration:
+```bash
+dotnet ef migrations add <Name> --project src/ExpenseTracker.Infrastructure --startup-project src/ExpenseTracker.Api --output-dir Persistence/Migrations
+```
+
+## Testing
+- `dotnet test` — runs all tests (Domain.Tests; more suites added per phase).
+- Domain unit tests run in < 1 s; no containers needed.
 - `npm --prefix client run test` — Vitest (planned).
 
 ## Conventions
-- Backend: `TreatWarningsAsErrors=true`, camelCase JSON, HAL media type `application/hal+json`. No XML doc comments required (CS1591 suppressed).
+- Backend: `TreatWarningsAsErrors=true`, camelCase JSON, HAL media type `application/hal+json`. XML doc comments not required (CS1591 suppressed).
+- Strongly typed IDs (`TenantId`, `UserId`, etc.) are readonly record structs wrapping `Guid`, implementing `IStrongId`.
 - All API responses walk from HAL root `/api`; never hardcode URLs in the client.
 - New slices go under `src/ExpenseTracker.Api/Features/<Feature>/` (Endpoints.cs, Requests.cs, Responses.cs, Handlers/, Validators.cs). See `docs/requirements/14-architecture.md`.
-- Strongly typed IDs (`TenantId`, `AccountId`, ...) live in `src/ExpenseTracker.Domain`.
+- Tenant scope: EF Core global query filter on `TenantId` (exclude `Tenant` itself); active tenant resolved per request from JWT claim via `ITenantContext` (placeholder `AmbientTenantContext` pre-auth).
 - Commit messages: short imperative summary; never commit secrets.
 
 ## Requirements discipline
 Requirements live in `docs/requirements/`. When constraints change, append a row to the decisions log in `docs/requirements/00-overview.md` rather than silently rewriting history.
 
+## Decisions log highlights
+See `docs/requirements/00-overview.md` for the full table. Key recent entries:
+- #13 — Defer API versioning until a real breaking change (YAGNI; additive-only HAL changes).
+- #14 — Tenant route id = GUID only (no slug for MVP); slug additive later if needed.
+
 ## Current status
-Walking skeleton complete: HAL root + health endpoints served by .NET 10 API, React client walks `/api` via the HalClient. Next slice: auth (magic link + passkeys) — see `docs/requirements/02-authentication.md`.
+Persistence + Domain foundation complete: strongly-typed IDs, Money/FXRate value objects, User/Tenant/TenantMembership aggregates, EF Core DbContext with Postgres configs, Initial migration, advisory-locked `MigrationsHostedService`, 22 passing domain tests. Next slice: auth (magic link + passkeys) — see `docs/requirements/02-authentication.md`. (Blocked on local Podman machine startup issue; verify with `podman machine start` before booting API.)
+
+## Auth wiring (magic link)
+- JWT access tokens signed with ECDSA P-256 via `JwtAccessTokenService` (singleton). Ephemeral key in dev; PEM key from config in prod.
+- Refresh tokens stored hashed in `refresh_tokens` table, rotating on each refresh, family-based reuse detection.
+- Magic-link tokens stored hashed in `magic_link_tokens` table, 15-min TTL, single-use.
+- `AuthSetup.AddExpenseTrackerAuth()` wires: `IAccessTokenService` (eager singleton), `IEmailSender` (SmtpEmailSender to Papercut), `ICurrentUserService` (scoped, reads JWT claims), `ITenantContext` (scoped, derives tenant from JWT claim), JWT bearer auth, authorization.
+- Cookie helpers: `response.SetRefreshCookie(rawToken, expiresAt)`, `request.GetRefreshCookie()`, `response.ClearRefreshCookie()`. Cookie path `/api/auth`, HttpOnly, Secure, SameSite=Lax.
+- Endpoints under `Features/Auth/AuthEndpoints.cs`: `POST /api/auth/magic-link`, `POST /api/auth/magic-link/verify`, `POST /api/auth/refresh`, `POST /api/auth/switch-tenant`.
+- Dev: magic-link URL is logged when email sending fails (so tests can extract the token without Papercut running).
+- Passkeys: not yet implemented; deferred to next iteration.

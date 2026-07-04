@@ -17,11 +17,34 @@ public static class Root
             .WithLink("health-live", Link.Get("/health/live", "Liveness probe"))
             .WithLink("health-ready", Link.Get("/health/ready", "Readiness probe"))
             .WithLink("openapi", Link.Get("/api/openapi.json", "OpenAPI document"))
-            .WithLink("et:auth", Link.Get("/api/auth", "Authentication endpoints (Phase 1)"))
+            .WithLink("et:auth", new Link
+            {
+                Href = "/api/auth/magic-link",
+                Method = "POST",
+                Title = "Request a magic-link login email"
+            })
+            .WithLink("et:auth-verify", new Link
+            {
+                Href = "/api/auth/magic-link/verify",
+                Method = "POST",
+                Title = "Verify a magic-link token and receive access + refresh tokens"
+            })
+            .WithLink("et:auth-refresh", new Link
+            {
+                Href = "/api/auth/refresh",
+                Method = "POST",
+                Title = "Rotate the refresh cookie and issue a new access token"
+            })
+            .WithLink("et:auth-switch-tenant", new Link
+            {
+                Href = "/api/auth/switch-tenant",
+                Method = "POST",
+                Title = "Switch the active tenant (requires authentication)"
+            })
             .WithLink("et:tenants", Link.Get("/api/tenants?filter=mine", "Tenants the caller belongs to (Phase 1)"))
             .WithLink("et:create-tenant", Link.Post("/api/tenants", "Create a new tenant workspace (Phase 1)"))
             .WithState("name", "Expense Tracker API")
             .WithState("version", "0.1.0")
-            .WithState("phase", "walking-skeleton");
+            .WithState("phase", "auth");
     }
 }

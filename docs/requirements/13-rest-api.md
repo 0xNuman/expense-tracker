@@ -81,7 +81,7 @@ List collection responses use HAL's `_embedded.item`. Curie prefixes used for cu
 | Provider unavailable (FX, OCR) | 503 with `Retry-After` |
 
 ## Versioning
-- No URL version. Additive changes only; breaking changes require a new media type (`application/hal+json; version=2`) negotiation via Accept header.
+No versioning strategy in Phase 1. Additive changes only — new rels, fields, and links are non-breaking. Revisit when a real breaking change forces the decision (options considered: media-type negotiation, URL prefix `/api/v1/...`, custom `Api-Version` header).
 
 ## OpenAPI
 - Mini-spinner emits Swagger UI at `/api/docs` (HTML) and OpenAPI doc at `/api/openapi.json`.

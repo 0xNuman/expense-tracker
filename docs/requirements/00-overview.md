@@ -69,3 +69,5 @@ A multi-tenant SaaS expense tracker with a rich-domain .NET 10 backend (EF Core 
 | 10 | React + Vite + TS + Tailwind, mobile-first | kickoff | Modern, fast HMR, large ecosystem; PWA installable. |
 | 11 | Hand-rolled HAL walker + TanStack Query | kickoff | Explicit HATEOAS at the client; caching layer free. |
 | 12 | Pluggable `IExchangeRateProvider` and `IReceiptParser` | kickoff | Defer concrete provider commitment to later phases. |
+| 13 | Defer versioning until a real breaking change | 2026-07-04 | YAGNI; additive-only HAL changes keep clients stable. |
+| 14 | Tenant route id = GUID only (no slug) | 2026-07-04 | HATEOAS makes slug mostly cosmetic; slug add nothing in MVP but rename/collision cost. Additive later if needed. |

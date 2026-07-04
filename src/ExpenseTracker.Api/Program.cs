@@ -1,5 +1,9 @@
+using ExpenseTracker.Api.Features.Auth;
 using ExpenseTracker.Api.Hal;
 using ExpenseTracker.Api.Health;
+using ExpenseTracker.Api.Persistence;
+using ExpenseTracker.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Api;
 
@@ -15,6 +19,9 @@ public static class Program
             .AddEndpointsApiExplorer()
             .AddOpenApi();
 
+        builder.Services.AddExpenseTrackerPersistence(builder.Configuration);
+        builder.Services.AddExpenseTrackerAuth(builder.Configuration);
+
         var app = builder.Build();
 
         if (app.Environment.IsDevelopment())
@@ -23,6 +30,8 @@ public static class Program
         }
 
         app.UseHttpsRedirection();
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         app.MapGet("/", () => Results.Redirect("/api"))
            .ExcludeFromDescription();
@@ -36,15 +45,17 @@ public static class Program
            .ExcludeFromDescription()
            .WithTags("Health");
 
-        app.MapGet("/health/ready", async (CancellationToken ct) =>
+        app.MapGet("/health/ready", async (ExpenseTrackerDbContext db, CancellationToken ct) =>
         {
-            var ready = await HealthChecker.IsReadyAsync(ct);
+            var ready = await HealthChecker.IsReadyAsync(db, ct);
             return ready
                 ? Results.Ok(new { status = "Healthy" })
                 : Results.Json(new { status = "Degraded" }, statusCode: StatusCodes.Status503ServiceUnavailable);
         })
            .ExcludeFromDescription()
            .WithTags("Health");
+
+        app.MapAuth();
 
         app.Run();
     }

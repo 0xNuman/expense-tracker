@@ -1,12 +1,21 @@
+using ExpenseTracker.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+
 namespace ExpenseTracker.Api.Health;
 
-/// <summary>Lightweight readiness probe — wired to real dependencies as phases progress.</summary>
+/// <summary>Readiness probe — verifies the database connection is alive.</summary>
 public static class HealthChecker
 {
-    /// <summary>Walking-skeleton readiness: process is alive.</summary>
-    public static Task<bool> IsReadyAsync(CancellationToken ct)
+    /// <summary>Returns true when the database is reachable and bound to a known schema.</summary>
+    public static async Task<bool> IsReadyAsync(ExpenseTrackerDbContext db, CancellationToken ct)
     {
-        ct.ThrowIfCancellationRequested();
-        return Task.FromResult(true);
+        try
+        {
+            return await db.Database.CanConnectAsync(ct);
+        }
+        catch
+        {
+            return false;
+        }
     }
 }
