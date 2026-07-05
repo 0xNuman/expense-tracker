@@ -81,4 +81,25 @@ public sealed class Transaction : AggregateRoot
     public void AssignCategory(CategoryId? categoryId) => CategoryId = categoryId;
 
     public void UpdateMemo(string? memo) => Memo = memo;
+
+    public void Update(
+        TransactionType type,
+        decimal amount,
+        AccountId accountId,
+        DateOnly occurredOn,
+        CategoryId? categoryId = null,
+        string? memo = null)
+    {
+        if (IsVoided) throw new InvalidOperationException("Cannot update a voided transaction.");
+        if (amount <= 0m) throw new ArgumentException("Amount must be positive.", nameof(amount));
+        if (occurredOn > DateOnly.FromDateTime(DateTimeOffset.UtcNow.Date.AddDays(1)))
+            throw new ArgumentException("Occurred-on cannot be more than 1 day in the future.", nameof(occurredOn));
+
+        Type = type;
+        Amount = Math.Round(amount, 4, MidpointRounding.ToEven);
+        AccountId = accountId;
+        OccurredOn = occurredOn;
+        CategoryId = categoryId;
+        Memo = memo?.Trim();
+    }
 }

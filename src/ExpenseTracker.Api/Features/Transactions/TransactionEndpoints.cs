@@ -31,6 +31,10 @@ public static class TransactionEndpoints
                 .WithName("ListTransactions")
                 .WithSummary("List all transactions for the active tenant.");
 
+        allTxns.MapPut("/{id}", UpdateTransaction)
+                .WithName("UpdateTransaction")
+                .WithSummary("Update a transaction.");
+
         allTxns.MapPost("/{id}/void", VoidTransaction)
                 .WithName("VoidTransaction")
                 .WithSummary("Void a transaction (preserves audit history).");
@@ -100,6 +104,58 @@ public static class TransactionEndpoints
 
         var doc = ToTransactionDocument(txn);
         return Results.Extensions.Hal(doc, StatusCodes.Status201Created);
+    }
+
+    // ── PUT /api/transactions/{id} ─────────────────────────────────
+    private static async Task<IResult> UpdateTransaction(
+        Guid id,
+        UpdateTransactionRequest request,
+        ExpenseTrackerDbContext db,
+        CancellationToken ct)
+    {
+        var txnId = new TransactionId(id);
+        var txn = await db.Transactions.FirstOrDefaultAsync(t => t.Id == txnId, ct);
+        if (txn is null)
+            return Results.Problem("Transaction not found.", statusCode: StatusCodes.Status404NotFound);
+
+        if (txn.IsVoided)
+            return Results.Problem("Cannot update a voided transaction.", statusCode: StatusCodes.Status422UnprocessableEntity);
+
+        TransactionType type;
+        try { type = Enum.Parse<TransactionType>(request.Type, ignoreCase: true); }
+        catch (ArgumentException) { return Results.Problem("Invalid transaction type.", statusCode: StatusCodes.Status400BadRequest); }
+
+        DateOnly occurredOn;
+        if (!DateOnly.TryParse(request.OccurredOn, out occurredOn))
+            return Results.Problem("occurredOn must be a valid date.", statusCode: StatusCodes.Status400BadRequest);
+
+        CategoryId? categoryId = null;
+        if (!string.IsNullOrWhiteSpace(request.CategoryId) && Guid.TryParse(request.CategoryId, out var cid))
+            categoryId = new CategoryId(cid);
+
+        try
+        {
+            txn.Update(
+                type,
+                request.Amount,
+                txn.AccountId,
+                occurredOn,
+                categoryId,
+                request.Memo);
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.Problem(ex.Message, statusCode: StatusCodes.Status400BadRequest);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.Problem(ex.Message, statusCode: StatusCodes.Status422UnprocessableEntity);
+        }
+
+        await db.SaveChangesAsync(ct);
+
+        var doc = ToTransactionDocument(txn);
+        return Results.Extensions.Hal(doc);
     }
 
     // ── GET /api/accounts/{accountId}/transactions ────────────────
@@ -274,6 +330,9 @@ public static class TransactionEndpoints
             .WithState("createdAtUtc", txn.CreatedAtUtc)
             .WithState("isVoided", txn.IsVoided)
             .WithState("voidedAtUtc", txn.VoidedAtUtc);
+
+        if (txn.CategoryId.HasValue)
+            doc.WithState("categoryId", txn.CategoryId.Value.ToString());
 
         if (reason is not null)
             doc.WithState("voidReason", reason);

@@ -48,11 +48,20 @@ public sealed class Account : AggregateRoot
         return account;
     }
 
-    public void Update(string name, AccountType type)
+    public void Update(string name, AccountType type, CurrencyCode? newCurrency = null, bool hasTransactions = true)
     {
         ValidateName(name);
         Name = name.Trim();
         Type = type;
+        
+        if (newCurrency.HasValue && newCurrency.Value != Currency)
+        {
+            if (hasTransactions) 
+                throw new ArgumentException("Cannot change currency of an account that has transactions.");
+            
+            Currency = newCurrency.Value;
+            OpeningBalance = Money.Of(OpeningBalance.Amount, newCurrency.Value);
+        }
     }
 
     public void Archive() => IsArchived = true;

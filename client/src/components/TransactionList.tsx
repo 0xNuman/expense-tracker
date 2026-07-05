@@ -1,5 +1,10 @@
+import { useState, useEffect } from 'react';
 import type { Transaction } from '../hal/api';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { useAuth } from '../auth/AuthContext';
+import { fetchCategories } from '../features/categories/CategoriesTree';
+import type { Category } from '../features/categories/CategoriesTree';
+import { CategoryIconRenderer } from './IconPicker';
 
 function dateLabel(occurredOn: string): string {
   const today = new Date();
@@ -12,16 +17,33 @@ function dateLabel(occurredOn: string): string {
 }
 
 export function TransactionList({ transactions, onVoidRequested, onEditRequested }: { transactions: Transaction[]; onVoidRequested?: (t: Transaction) => void; onEditRequested?: (t: Transaction) => void }) {
-  if (transactions.length === 0) {
+  const { accessToken } = useAuth();
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [showVoided, setShowVoided] = useState(false);
+
+  useEffect(() => {
+    if (accessToken) {
+      fetchCategories(accessToken, true).then(setCategories).catch(console.error);
+    }
+  }, [accessToken]);
+
+  const visibleTransactions = showVoided ? transactions : transactions.filter(t => !t.isVoided);
+
+  if (visibleTransactions.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
-        No transactions yet. Add one to get started.
+      <div className="flex flex-col gap-2">
+        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
+          No transactions yet. Add one to get started.
+        </div>
+        {transactions.length > 0 && (
+          <button onClick={() => setShowVoided(true)} className="text-xs font-medium text-indigo-500 text-right hover:underline">Show voided</button>
+        )}
       </div>
     );
   }
 
   const groups = new Map<string, Transaction[]>();
-  for (const t of transactions) {
+  for (const t of visibleTransactions) {
     const label = dateLabel(t.occurredOn);
     const arr = groups.get(label) ?? [];
     arr.push(t);
@@ -43,13 +65,24 @@ export function TransactionList({ transactions, onVoidRequested, onEditRequested
                   <div className="flex items-center gap-3">
                     <span
                       aria-hidden
-                      className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+                      className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
                         isIncome
                           ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400'
                           : 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400'
                       }`}
                     >
-                      {isIncome ? <ArrowDownRight className="h-5 w-5" /> : <ArrowUpRight className="h-5 w-5" />}
+                      {(() => {
+                         const cat = t.categoryId ? categories.find(c => c.id === t.categoryId) : undefined;
+                         if (cat && cat.icon) {
+                           return (
+                             <>
+                               <CategoryIconRenderer iconName={cat.icon} className="h-5 w-5" />
+                               {isIncome ? <ArrowDownRight className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-white dark:bg-slate-900 p-[2px] text-emerald-600 dark:text-emerald-400" /> : <ArrowUpRight className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-white dark:bg-slate-900 p-[2px] text-rose-600 dark:text-rose-400" />}
+                             </>
+                           );
+                         }
+                         return isIncome ? <ArrowDownRight className="h-5 w-5" /> : <ArrowUpRight className="h-5 w-5" />;
+                      })()}
                     </span>
                     <div>
                       <div className="flex items-center gap-2">
@@ -57,7 +90,7 @@ export function TransactionList({ transactions, onVoidRequested, onEditRequested
                         {t.isVoided && <span className="text-[10px] font-bold uppercase text-slate-400">Voided</span>}
                       </div>
                       <p className="text-xs text-slate-500 dark:text-slate-400">
-                        {t.type} · {t.currency}
+                        {t.type} · {t.currency} {t.categoryId && categories.find(c => c.id === t.categoryId) && `· ${categories.find(c => c.id === t.categoryId)?.name}`}
                       </p>
                     </div>
                   </div>
@@ -97,6 +130,17 @@ export function TransactionList({ transactions, onVoidRequested, onEditRequested
           </ul>
         </section>
       ))}
+      {transactions.some(t => t.isVoided) && (
+        <div className="flex justify-end mt-2">
+          <button
+            type="button"
+            onClick={() => setShowVoided(!showVoided)}
+            className="text-xs font-medium text-slate-500 hover:text-slate-900 dark:hover:text-slate-300"
+          >
+            {showVoided ? 'Hide voided' : 'Show voided'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

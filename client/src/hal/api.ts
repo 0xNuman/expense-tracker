@@ -136,7 +136,7 @@ export async function createAccount(token: string, input: CreateAccountInput): P
 }
 
 /** List transactions (all for tenant, or filtered to a single account when `accountId` given). */
-export async function fetchTransactions(token: string, accountId?: string): Promise<Transaction[]> {
+export async function fetchTransactions(token: string, accountId?: string, tenantId?: string): Promise<Transaction[]> {
   const root = await fetchRoot();
   let href = pickLink(root, 'et:transactions').href;
   let method = 'GET';
@@ -145,7 +145,68 @@ export async function fetchTransactions(token: string, accountId?: string): Prom
     method = 'GET';
   }
   const doc = await halFetch<HalDocument>(href, { method }, token);
-  return embeddedItems(doc).map(toTransaction);
+  const txns = embeddedItems(doc).map(toTransaction);
+
+  if (tenantId) {
+    try {
+      const tHref = accountId 
+        ? `/api/accounts/${encodeURIComponent(accountId)}/transfers`
+        : `/api/tenants/${encodeURIComponent(tenantId)}/transfers`;
+      const tDoc = await halFetch<HalDocument>(tHref, { method: 'GET' }, token);
+      const transfers = embeddedItems(tDoc);
+      
+      for (const t of transfers) {
+        const id = state<string>(t, 'id');
+        const srcAccId = state<string>(t, 'sourceAccountId');
+        const destAccId = state<string>(t, 'destinationAccountId');
+        const srcAmt = state<number>(t, 'sourceAmount');
+        const srcCur = state<string>(t, 'sourceCurrency');
+        const destAmt = state<number>(t, 'destinationAmount');
+        const destCur = state<string>(t, 'destinationCurrency');
+        const occurredOn = state<string>(t, 'occurredOnUtc');
+        const memoStr = (t as Record<string, unknown>).memo as string | null;
+        const memo = memoStr ? `Transfer: ${memoStr}` : 'Transfer';
+        const isVoided = state<boolean>(t, 'isVoided');
+
+        if (!accountId || srcAccId === accountId) {
+          txns.push({
+            id: id + '_src',
+            accountId: srcAccId,
+            type: 'Expense',
+            amount: srcAmt,
+            currency: srcCur,
+            memo,
+            categoryId: null,
+            occurredOn,
+            isVoided
+          });
+        }
+        if (!accountId || destAccId === accountId) {
+          txns.push({
+            id: id + '_dest',
+            accountId: destAccId,
+            type: 'Income',
+            amount: destAmt,
+            currency: destCur,
+            memo,
+            categoryId: null,
+            occurredOn,
+            isVoided
+          });
+        }
+      }
+    } catch (e) {
+      console.error("Failed to fetch transfers for ledger", e);
+    }
+  }
+
+  return txns.sort((a, b) => {
+    // sort by date descending
+    const d = b.occurredOn.localeCompare(a.occurredOn);
+    // fallback to type or id to keep stable sort
+    if (d !== 0) return d;
+    return b.id.localeCompare(a.id);
+  });
 }
 
 function toTransaction(doc: HalDocument): Transaction {
@@ -216,6 +277,8 @@ export async function refreshToken(): Promise<AuthResult | null> {
     accessToken: state<string>(doc, 'accessToken'),
     expiresAtUtc: state<string>(doc, 'expiresAtUtc'),
     email: state<string | undefined>(doc, 'email'),
+    tenantId: state<string | undefined>(doc, 'tenantId'),
+    tenantName: state<string | undefined>(doc, 'tenantName'),
   };
 }
 
@@ -291,9 +354,10 @@ export async function completePasskeyRegistration(
   }
 }
 
-export async function updateAccount(token: string, id: string, name: string, type: string): Promise<Account> {
+export async function updateAccount(token: string, id: string, name: string, type: string, currency?: string): Promise<Account> {
   const href = `/api/accounts/${encodeURIComponent(id)}`;
-  const doc = await halFetch<HalDocument>(href, { method: 'PATCH', body: JSON.stringify({ name, type }) }, token);
+  const body = currency ? { name, type, currency } : { name, type };
+  const doc = await halFetch<HalDocument>(href, { method: 'PATCH', body: JSON.stringify(body) }, token);
   return toAccount(doc);
 }
 
@@ -313,4 +377,19 @@ export async function updateTransaction(token: string, id: string, input: Partia
   const href = `/api/transactions/${encodeURIComponent(id)}`;
   const doc = await halFetch<HalDocument>(href, { method: 'PUT', body: JSON.stringify(input) }, token);
   return toTransaction(doc);
+}
+
+export interface CreateTransferInput {
+  sourceAccountId: string;
+  destinationAccountId: string;
+  amount: number;
+  currency: string;
+  destinationAmount?: number;
+  memo?: string;
+  occurredOn?: string;
+}
+
+export async function createTransfer(token: string, tenantId: string, input: CreateTransferInput): Promise<void> {
+  const href = `/api/tenants/${encodeURIComponent(tenantId)}/transfers`;
+  await halFetch<HalDocument>(href, { method: 'POST', body: JSON.stringify(input) }, token);
 }

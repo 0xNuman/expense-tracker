@@ -29,17 +29,17 @@ export const FxRatesSettings: React.FC = () => {
   };
 
   return (
-    <div className="bg-white shadow rounded-lg p-6">
+    <div className="p-2">
       <h2 className="text-xl font-semibold mb-4">Exchange Rates</h2>
       
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium mb-1">
           Base Currency
         </label>
         <select
           value={baseCurrency}
           onChange={(e) => setBaseCurrency(e.target.value)}
-          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-slate-300 dark:border-slate-700 bg-transparent focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
         >
           <option value="USD">USD - US Dollar</option>
           <option value="EUR">EUR - Euro</option>
@@ -50,22 +50,22 @@ export const FxRatesSettings: React.FC = () => {
       </div>
 
       {loading ? (
-        <p className="text-gray-500">Loading rates...</p>
+        <p className="text-slate-500 dark:text-slate-400">Loading rates...</p>
       ) : error ? (
         <p className="text-red-500">{error}</p>
       ) : rates ? (
         <div>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
             Rates as of {new Date(rates.asOf).toLocaleString()}
           </p>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {Object.entries(rates.rates).map(([currency, data]) => {
               const quote = data as RateQuote;
               return (
-              <div key={currency} className="border rounded p-3">
+              <div key={currency} className="border border-slate-200 dark:border-slate-700 rounded-lg p-4 bg-slate-50 dark:bg-slate-800">
                 <div className="text-lg font-medium">{currency}</div>
-                <div className="text-gray-900">{quote.rate.toFixed(4)}</div>
-                <div className="text-xs text-gray-500 mt-1">Source: {quote.source}</div>
+                <div className="text-slate-900 dark:text-slate-100 mt-1">{quote.rate.toFixed(4)}</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-2">Source: {quote.source}</div>
               </div>
             )})}
           </div>

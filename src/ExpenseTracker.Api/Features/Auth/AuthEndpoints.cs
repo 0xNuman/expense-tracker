@@ -324,6 +324,12 @@ group.MapPost("/switch-tenant", SwitchTenant)
             .FirstOrDefaultAsync(m => m.UserId == stored.UserId, ct);
 
         var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == stored.UserId, ct);
+        string? tenantName = null;
+        if (membership != null)
+        {
+            var tenant = await db.Tenants.IgnoreQueryFilters().FirstOrDefaultAsync(t => t.Id == membership.TenantId, ct);
+            tenantName = tenant?.Name;
+        }
 
         var claims = new AccessTokenClaims(
             stored.UserId,
@@ -339,7 +345,9 @@ group.MapPost("/switch-tenant", SwitchTenant)
             .WithLink("switch-tenant", Link.Post("/api/auth/switch-tenant"))
             .WithState("accessToken", accessResult.Token)
             .WithState("expiresAtUtc", accessResult.ExpiresAtUtc)
-            .WithState("email", claims.Email);
+            .WithState("email", claims.Email)
+            .WithState("tenantId", membership?.TenantId.ToString() ?? string.Empty)
+            .WithState("tenantName", tenantName);
 
         return Results.Extensions.Hal(hal);
     }

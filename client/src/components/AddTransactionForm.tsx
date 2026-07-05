@@ -105,7 +105,7 @@ export function AddTransactionForm({
         </Field>
       </div>
       <Field label="Account">
-        <select value={accountId} onChange={(e) => setAccountId(e.target.value)} className="input">
+        <select value={accountId} onChange={(e) => setAccountId(e.target.value)} className="input" disabled={!!initialData}>
           {accounts.length === 0 && <option value="">No accounts yet</option>}
           {accounts.map((a) => (
             <option key={a.id} value={a.id}>

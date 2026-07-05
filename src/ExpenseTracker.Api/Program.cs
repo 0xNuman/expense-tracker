@@ -9,6 +9,8 @@ using ExpenseTracker.Api.Features.Transactions;
 using ExpenseTracker.Api.Features.Transfers;
 using ExpenseTracker.Api.Hal;
 using ExpenseTracker.Api.Health;
+using ExpenseTracker.Domain;
+using ExpenseTracker.Infrastructure.FX;
 using ExpenseTracker.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -66,6 +68,10 @@ public class Program
 
         builder.Services.AddExpenseTrackerPersistence(builder.Configuration);
         builder.Services.AddExpenseTrackerAuth(builder.Configuration);
+
+        // 5. FX Services
+        builder.Services.AddHttpClient<IExchangeRateProvider, FrankfurterExchangeRateProvider>();
+        builder.Services.AddHostedService<FxSyncBackgroundService>();
 
         var app = builder.Build();
 

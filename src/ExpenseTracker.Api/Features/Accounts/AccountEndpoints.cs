@@ -143,7 +143,16 @@ public static class AccountEndpoints
 
         try
         {
-            account.Update(request.Name, type);
+            CurrencyCode? newCurrency = string.IsNullOrWhiteSpace(request.Currency) ? null : CurrencyCode.From(request.Currency);
+            bool hasTransactions = false;
+            
+            if (newCurrency.HasValue && newCurrency.Value != account.Currency)
+            {
+                hasTransactions = await db.Transactions.AnyAsync(t => t.AccountId == accountId, ct) 
+                                  || await db.Transfers.AnyAsync(t => t.SourceAccountId == accountId || t.DestinationAccountId == accountId, ct);
+            }
+
+            account.Update(request.Name, type, newCurrency, hasTransactions);
         }
         catch (ArgumentException ex)
         {
@@ -218,6 +227,32 @@ public static class AccountEndpoints
                 result[m.AccountId] += m.Sum;
             else
                 result[m.AccountId] -= m.Sum;
+        }
+
+        var transfersOut = await db.Transfers
+            .AsNoTracking()
+            .Where(t => idList.Contains(t.SourceAccountId) && !t.IsVoided)
+            .GroupBy(t => t.SourceAccountId)
+            .Select(g => new { AccountId = g.Key, Sum = g.Sum(t => t.SourceAmount) })
+            .ToListAsync(ct);
+
+        var transfersIn = await db.Transfers
+            .AsNoTracking()
+            .Where(t => idList.Contains(t.DestinationAccountId) && !t.IsVoided)
+            .GroupBy(t => t.DestinationAccountId)
+            .Select(g => new { AccountId = g.Key, Sum = g.Sum(t => t.DestinationAmount) })
+            .ToListAsync(ct);
+
+        foreach (var tOut in transfersOut)
+        {
+            if (!result.ContainsKey(tOut.AccountId)) result[tOut.AccountId] = 0m;
+            result[tOut.AccountId] -= tOut.Sum;
+        }
+
+        foreach (var tIn in transfersIn)
+        {
+            if (!result.ContainsKey(tIn.AccountId)) result[tIn.AccountId] = 0m;
+            result[tIn.AccountId] += tIn.Sum;
         }
 
         return result;

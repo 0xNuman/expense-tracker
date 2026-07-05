@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Api.Features.Transfers;
 
-public record CreateTransferRequest(Guid SourceAccountId, Guid DestinationAccountId, decimal Amount, string Currency, decimal? DestinationAmount, string? Memo);
+public record CreateTransferRequest(Guid SourceAccountId, Guid DestinationAccountId, decimal Amount, string Currency, decimal? DestinationAmount, string? Memo, DateTimeOffset? OccurredOn);
 public record VoidTransferRequest(string? Reason);
 
 public static class TransferEndpoints
@@ -65,20 +65,20 @@ public static class TransferEndpoints
             destAmt,
             destCurrency,
             fx,
-            DateOnly.FromDateTime(DateTime.UtcNow),
+            req.OccurredOn.HasValue ? DateOnly.FromDateTime(req.OccurredOn.Value.UtcDateTime) : DateOnly.FromDateTime(DateTime.UtcNow),
             req.Memo);
 
         db.Transfers.Add(transfer);
         await db.SaveChangesAsync(ct);
 
-        return Results.Created($"/api/transfers/{transfer.Id.Value}", ToDocument(transfer));
+        return Results.Extensions.Hal(ToDocument(transfer), StatusCodes.Status201Created);
     }
 
     private static async Task<IResult> ListTransfersForTenant(Guid tenantId, ExpenseTrackerDbContext db, ICurrentUserService currentUser, CancellationToken ct)
     {
         if (currentUser.ActiveTenantId?.Value != tenantId) return Results.Forbid();
         var items = await db.Transfers.AsNoTracking().Where(t => t.TenantId == new TenantId(tenantId)).OrderByDescending(t => t.OccurredOnUtc).ToListAsync(ct);
-        return Results.Ok(new HalDocument().WithEmbedded("item", items.Select(t => ToDocument(t)).ToList()));
+        return Results.Extensions.Hal(new HalDocument().WithEmbedded("item", items.Select(t => ToDocument(t)).ToList()));
     }
 
     private static async Task<IResult> ListTransfersForAccount(Guid accountId, ExpenseTrackerDbContext db, ICurrentUserService currentUser, CancellationToken ct)
@@ -88,14 +88,13 @@ public static class TransferEndpoints
             .Where(t => t.SourceAccountId == aId || t.DestinationAccountId == aId)
             .OrderByDescending(t => t.OccurredOnUtc)
             .ToListAsync(ct);
-        return Results.Ok(new HalDocument().WithEmbedded("item", items.Select(t => ToDocument(t)).ToList()));
+        return Results.Extensions.Hal(new HalDocument().WithEmbedded("item", items.Select(t => ToDocument(t)).ToList()));
     }
 
     private static async Task<IResult> GetTransfer(Guid id, ExpenseTrackerDbContext db, ICurrentUserService currentUser, CancellationToken ct)
     {
         var t = await db.Transfers.FindAsync(new object[] { new TransferId(id) }, ct);
-        if (t == null) return Results.NotFound();
-        return Results.Ok(ToDocument(t));
+        return t == null ? Results.NotFound() : Results.Extensions.Hal(ToDocument(t));
     }
 
     private static async Task<IResult> VoidTransfer(Guid id, VoidTransferRequest req, ExpenseTrackerDbContext db, ICurrentUserService currentUser, CancellationToken ct)
@@ -106,7 +105,7 @@ public static class TransferEndpoints
         
         t.Void(currentUser.UserId!.Value, DateTimeOffset.UtcNow);
         await db.SaveChangesAsync(ct);
-        return Results.Ok(ToDocument(t));
+        return Results.Extensions.Hal(ToDocument(t));
     }
 
     private static HalDocument ToDocument(Transfer t)

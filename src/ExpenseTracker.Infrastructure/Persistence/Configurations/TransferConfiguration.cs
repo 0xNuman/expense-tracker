@@ -46,8 +46,8 @@ public sealed class TransferConfiguration : IEntityTypeConfiguration<Transfer>
 
         b.Property(t => t.FxSnapshot)
             .HasConversion(
-                v => v.HasValue ? System.Text.Json.JsonSerializer.Serialize(v.Value, (System.Text.Json.JsonSerializerOptions?)null) : null,
-                v => string.IsNullOrEmpty(v) ? (FXRate?)null : System.Text.Json.JsonSerializer.Deserialize<FXRate>(v, (System.Text.Json.JsonSerializerOptions?)null)
+                v => v.HasValue ? System.Text.Json.JsonDocument.Parse(System.Text.Json.JsonSerializer.Serialize(v.Value, (System.Text.Json.JsonSerializerOptions?)null), new System.Text.Json.JsonDocumentOptions()) : null,
+                v => v != null ? System.Text.Json.JsonSerializer.Deserialize<FXRate>(v, (System.Text.Json.JsonSerializerOptions?)null) : (FXRate?)null
             )
             .HasColumnName("fx_snapshot")
             .HasColumnType("jsonb");

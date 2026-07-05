@@ -14,7 +14,7 @@ import { ErrorBanner } from '../components/ErrorBanner';
 type Modal = 'none' | 'account' | 'transaction' | 'transfer';
 
 export function DashboardPage() {
-  const { accessToken } = useAuth();
+  const { accessToken, user } = useAuth();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,13 +24,13 @@ export function DashboardPage() {
   const [accountToEdit, setAccountToEdit] = useState<Account | undefined>(undefined);
 
   const load = async () => {
-    if (!accessToken) return;
+    if (!accessToken || !user) return;
     setError(null);
     setLoading(true);
     try {
       const [a, t] = await Promise.all([
         fetchAccounts(accessToken),
-        fetchTransactions(accessToken),
+        fetchTransactions(accessToken, undefined, user.tenantId),
       ]);
       setAccounts(a);
       setTransactions(t);
