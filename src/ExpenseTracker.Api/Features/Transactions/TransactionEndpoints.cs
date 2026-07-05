@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using ExpenseTracker.Api.Auth;
 using ExpenseTracker.Api.Hal;
 using ExpenseTracker.Domain;

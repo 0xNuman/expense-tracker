@@ -1,6 +1,4 @@
-using ExpenseTracker.Domain;
 using ExpenseTracker.Infrastructure.Persistence;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 

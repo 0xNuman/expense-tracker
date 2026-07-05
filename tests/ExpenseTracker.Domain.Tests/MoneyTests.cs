@@ -1,5 +1,3 @@
-using ExpenseTracker.Domain;
-
 namespace ExpenseTracker.Domain.Tests;
 
 public class MoneyTests

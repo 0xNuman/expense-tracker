@@ -1,5 +1,4 @@
 using ExpenseTracker.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Api.Health;
 

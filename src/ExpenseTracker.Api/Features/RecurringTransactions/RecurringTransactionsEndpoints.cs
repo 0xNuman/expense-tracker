@@ -1,6 +1,4 @@
-using ExpenseTracker.Api.Auth;
 using ExpenseTracker.Domain;
-using ExpenseTracker.Infrastructure;
 using ExpenseTracker.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;

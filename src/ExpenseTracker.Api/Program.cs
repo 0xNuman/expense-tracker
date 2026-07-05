@@ -1,6 +1,3 @@
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.Json;
 using ExpenseTracker.Api.Features.Accounts;
 using ExpenseTracker.Api.Features.Auth;
 using ExpenseTracker.Api.Features.Categories;
@@ -12,12 +9,10 @@ using ExpenseTracker.Api.Features.Transactions;
 using ExpenseTracker.Api.Features.Transfers;
 using ExpenseTracker.Api.Hal;
 using ExpenseTracker.Api.Health;
-using ExpenseTracker.Api.Persistence;
 using ExpenseTracker.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using System.Threading.RateLimiting;
 

@@ -1,11 +1,9 @@
 using ExpenseTracker.Api.Auth;
-using ExpenseTracker.Domain;
 using ExpenseTracker.Infrastructure.Auth;
 using ExpenseTracker.Infrastructure.Email;
 using ExpenseTracker.Infrastructure.Persistence;
 using Fido2NetLib;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
 namespace ExpenseTracker.Api;

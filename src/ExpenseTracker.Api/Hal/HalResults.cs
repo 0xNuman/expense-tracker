@@ -1,5 +1,3 @@
-using ExpenseTracker.Api.Hal;
-
 namespace ExpenseTracker.Api.Hal;
 
 /// <summary>IResult extensions for emitting HAL documents with the correct media type.</summary>

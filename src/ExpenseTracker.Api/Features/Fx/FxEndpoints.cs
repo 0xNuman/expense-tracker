@@ -1,9 +1,6 @@
 using ExpenseTracker.Domain;
 using ExpenseTracker.Infrastructure.Persistence;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Api.Features.Fx;

@@ -1,9 +1,3 @@
-using ExpenseTracker.Api.Auth;
-using ExpenseTracker.Api.Hal;
-using ExpenseTracker.Domain;
-using ExpenseTracker.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
-
 namespace ExpenseTracker.Api.Features.Accounts;
 
 /// <summary>Request bodies for account endpoints.</summary>

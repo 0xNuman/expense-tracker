@@ -1,10 +1,6 @@
 using ExpenseTracker.Domain;
-using ExpenseTracker.Infrastructure;
 using ExpenseTracker.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace ExpenseTracker.Api.Features.RecurringTransactions;
 

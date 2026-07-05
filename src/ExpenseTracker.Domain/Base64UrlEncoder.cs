@@ -1,5 +1,3 @@
-using System;
-
 namespace ExpenseTracker.Domain;
 
 /// <summary>Base64url (RFC 4648 §5) encoder/decoder for URL-safe token transport.</summary>

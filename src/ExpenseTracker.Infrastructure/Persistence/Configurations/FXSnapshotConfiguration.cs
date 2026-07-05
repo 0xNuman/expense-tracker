@@ -1,5 +1,4 @@
 using ExpenseTracker.Domain;
-using ExpenseTracker.Infrastructure.Persistence.Converters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

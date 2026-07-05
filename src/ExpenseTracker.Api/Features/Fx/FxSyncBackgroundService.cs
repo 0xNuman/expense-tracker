@@ -1,8 +1,5 @@
 using ExpenseTracker.Domain;
 using ExpenseTracker.Infrastructure.Persistence;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace ExpenseTracker.Api.Features.Fx;
 
