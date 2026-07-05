@@ -1,4 +1,5 @@
 import type { Transaction } from '../hal/api';
+import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
 function dateLabel(occurredOn: string): string {
   const today = new Date();
@@ -34,7 +35,7 @@ export function TransactionList({ transactions, onVoidRequested, onEditRequested
           <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
             {label}
           </h3>
-          <ul className="divide-y divide-slate-100 overflow-hidden glass rounded-xl shadow-sm dark:divide-slate-800">
+          <ul className="divide-y divide-slate-100 overflow-hidden glass rounded-2xl shadow-sm dark:divide-slate-800/60 dark:bg-slate-900/50">
             {items.map((t) => {
               const isIncome = t.type === 'Income';
               return (
@@ -42,13 +43,13 @@ export function TransactionList({ transactions, onVoidRequested, onEditRequested
                   <div className="flex items-center gap-3">
                     <span
                       aria-hidden
-                      className={`flex h-9 w-9 items-center justify-center rounded-full text-sm ${
+                      className={`flex h-10 w-10 items-center justify-center rounded-xl ${
                         isIncome
-                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
-                          : 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300'
+                          ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400'
+                          : 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400'
                       }`}
                     >
-                      {isIncome ? '↑' : '↓'}
+                      {isIncome ? <ArrowDownRight className="h-5 w-5" /> : <ArrowUpRight className="h-5 w-5" />}
                     </span>
                     <div>
                       <div className="flex items-center gap-2">

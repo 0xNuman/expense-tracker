@@ -100,7 +100,7 @@ export function DashboardPage() {
             <button
               type="button"
               onClick={() => setModal('account')}
-              className="rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-md transition-all hover:scale-105 hover:shadow-lg"
+              className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
             >
               + Add
             </button>
@@ -130,7 +130,7 @@ export function DashboardPage() {
               <button
                 type="button"
                 onClick={() => setModal('transfer')}
-                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition-all hover:bg-slate-50 hover:scale-105 hidden md:block dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 hidden md:block dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800/50"
               >
                 Transfer
               </button>
@@ -140,7 +140,7 @@ export function DashboardPage() {
                   setTransactionToEdit(undefined);
                   setModal('transaction');
                 }}
-                className="rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-md transition-all hover:scale-105 hover:shadow-lg hidden md:block"
+                className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 hidden md:block dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
               >
                 + Add
               </button>
@@ -164,7 +164,7 @@ export function DashboardPage() {
           setTransactionToEdit(undefined);
           setModal('transaction');
         }}
-        className="fixed bottom-20 right-5 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-xl transition-transform hover:scale-110 active:scale-95 md:hidden"
+        className="fixed bottom-20 right-5 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-slate-900 text-white shadow-lg transition-transform hover:scale-105 active:scale-95 md:hidden dark:bg-white dark:text-slate-900"
       >
         +
       </button>
