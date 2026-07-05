@@ -155,8 +155,8 @@ export const CategoriesTree: React.FC = () => {
             return (
                 <div key={c.id} className="w-full">
                     <div 
-                        className={`flex items-center justify-between group rounded-xl p-3 my-1 transition-all duration-200 border border-transparent
-                            ${depth === 0 ? 'bg-white dark:bg-gray-800 shadow-sm hover:shadow-md' : 'hover:bg-gray-50 dark:hover:bg-gray-700'} 
+                        className={`flex items-center justify-between group rounded-xl p-3 my-1 transition-all duration-200 border
+                            ${depth === 0 ? 'bg-white border-slate-200 dark:border-slate-700 dark:bg-slate-900 shadow-sm hover:shadow-md' : 'border-transparent hover:bg-slate-200/50 dark:hover:bg-slate-800'} 
                             ${c.isArchived ? 'opacity-60 grayscale' : ''}
                         `}
                         style={{ marginLeft: depth > 0 ? '1.5rem' : '0' }}
@@ -175,8 +175,8 @@ export const CategoriesTree: React.FC = () => {
                             </div>
                             
                             <div className="flex flex-col">
-                                <span className="font-semibold text-gray-900 dark:text-white text-base tracking-tight">{c.name}</span>
-                                <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">{c.kind}</span>
+                                <span className="font-semibold text-slate-900 dark:text-white text-base tracking-tight">{c.name}</span>
+                                <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">{c.kind}</span>
                             </div>
                         </div>
 
@@ -206,13 +206,13 @@ export const CategoriesTree: React.FC = () => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto p-4 sm:p-8">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+        <div className="max-w-4xl mx-auto w-full">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
                 <div>
-                    <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-3">
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
                         Categories
                     </h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Organize your finances with a flexible hierarchy.</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Organize your finances with a flexible hierarchy.</p>
                 </div>
                 <div className="flex items-center gap-4">
                     <label className="flex items-center gap-2 cursor-pointer text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
@@ -226,15 +226,15 @@ export const CategoriesTree: React.FC = () => {
                     </label>
                     <button 
                         onClick={() => openCreateModal()} 
-                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-sm hover:shadow-md transition-all active:scale-95"
+                        className="flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white px-3.5 py-1.5 rounded-lg text-sm font-medium shadow-sm hover:shadow transition-all active:scale-95 whitespace-nowrap"
                     >
-                        <Plus size={18} />
+                        <Plus size={16} />
                         New Category
                     </button>
                 </div>
             </div>
 
-            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-4 sm:p-6 border border-gray-100 dark:border-gray-700/50 min-h-[500px]">
+            <div className="min-h-[500px]">
                 {categories.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-[400px] text-gray-400">
                         <FolderTree size={48} className="mb-4 opacity-50" />

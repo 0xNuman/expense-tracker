@@ -207,10 +207,10 @@ group.MapPost("/switch-tenant", SwitchTenant)
                 db.TenantMemberships.Add(m);
 
             db.Set<Category>().AddRange(
-                Category.Create(tenant.Id, "Food", CategoryKind.Expense, sortOrder: 1),
-                Category.Create(tenant.Id, "Transport", CategoryKind.Expense, sortOrder: 2),
-                Category.Create(tenant.Id, "Utilities", CategoryKind.Expense, sortOrder: 3),
-                Category.Create(tenant.Id, "Salary", CategoryKind.Income, sortOrder: 4)
+                Category.Create(tenant.Id, "Food", CategoryKind.Expense, icon: "Utensils", sortOrder: 1),
+                Category.Create(tenant.Id, "Transport", CategoryKind.Expense, icon: "Car", sortOrder: 2),
+                Category.Create(tenant.Id, "Utilities", CategoryKind.Expense, icon: "Zap", sortOrder: 3),
+                Category.Create(tenant.Id, "Salary", CategoryKind.Income, icon: "Banknote", sortOrder: 4)
             );
         }
 

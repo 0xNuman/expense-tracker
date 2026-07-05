@@ -105,7 +105,7 @@ export function SettingsPage() {
         <div className="flex-1">
           {activeTab === 'account' && (
             <>
-              <section className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+              <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                 <h3 className="font-medium">Account</h3>
           <dl className="mt-2 grid grid-cols-2 gap-2 text-sm">
             <dt className="text-slate-500 dark:text-slate-400">Email</dt>
@@ -115,7 +115,7 @@ export function SettingsPage() {
           </dl>
         </section>
 
-        <section className="mt-4 rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+        <section className="mt-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <h3 className="font-medium">Security</h3>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Register a passkey to sign in faster on this device.
@@ -144,28 +144,25 @@ export function SettingsPage() {
         )}
         
         {activeTab === 'categories' && (
-          <section className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-            <h3 className="font-medium mb-4">Categories</h3>
-            <CategoriesTree />
-          </section>
+          <CategoriesTree />
         )}
 
         {activeTab === 'recurring' && (
-          <section className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <h3 className="font-medium mb-4">Recurring Rules</h3>
             <RecurringRulesList tenantId={user.tenantId!} />
           </section>
         )}
 
         {activeTab === 'csv' && (
-          <section className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <h3 className="font-medium mb-4">CSV Import/Export</h3>
             <p className="text-sm text-slate-500 mb-4">Select an account from the dashboard to import CSV data. (Global import coming soon).</p>
           </section>
         )}
 
         {activeTab === 'fx' && (
-          <section className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <FxRatesSettings />
           </section>
         )}

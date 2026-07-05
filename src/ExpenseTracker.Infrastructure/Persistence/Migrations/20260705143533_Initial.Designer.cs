@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ExpenseTracker.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ExpenseTrackerDbContext))]
-    [Migration("20260705101746_Phase1_Features_FX_CSV")]
-    partial class Phase1_Features_FX_CSV
+    [Migration("20260705143533_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -68,12 +68,15 @@ namespace ExpenseTracker.Infrastructure.Persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("type");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_accounts");
 
-                    b.HasIndex("TenantId");
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("ix_accounts_tenant_id");
 
                     b.HasIndex("TenantId", "Name")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_accounts_tenant_id_name");
 
                     b.ToTable("accounts", (string)null);
                 });
@@ -82,10 +85,12 @@ namespace ExpenseTracker.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<DateTimeOffset>("FetchedAtUtc")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fetched_at_utc");
 
                     b.Property<string>("FromCurrency")
                         .IsRequired()
@@ -95,12 +100,14 @@ namespace ExpenseTracker.Infrastructure.Persistence.Migrations
 
                     b.Property<decimal>("Rate")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("rate");
 
                     b.Property<string>("Source")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("source");
 
                     b.Property<string>("ToCurrency")
                         .IsRequired()
@@ -108,66 +115,82 @@ namespace ExpenseTracker.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(3)")
                         .HasColumnName("to_currency");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_cached_rates");
 
-                    b.HasIndex("FromCurrency", "ToCurrency", "FetchedAtUtc");
+                    b.HasIndex("FromCurrency", "ToCurrency", "FetchedAtUtc")
+                        .HasDatabaseName("ix_cached_rates_from_currency_to_currency_fetched_at_utc");
 
-                    b.ToTable("CachedRates", (string)null);
+                    b.ToTable("cached_rates", (string)null);
                 });
 
             modelBuilder.Entity("ExpenseTracker.Domain.Category", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("Color")
                         .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("color");
 
                     b.Property<string>("Icon")
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("icon");
 
                     b.Property<bool>("IsArchived")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_archived");
 
                     b.Property<int>("Kind")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("kind");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(60)
-                        .HasColumnType("character varying(60)");
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("name");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("notes");
 
                     b.Property<Guid?>("ParentId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_id");
 
                     b.Property<int>("SortOrder")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
 
                     b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_categories");
 
                     b.HasIndex("TenantId", "ParentId", "Name")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_categories_tenant_id_parent_id_name");
 
-                    b.ToTable("Categories");
+                    b.ToTable("categories", (string)null);
                 });
 
             modelBuilder.Entity("ExpenseTracker.Domain.FXSnapshot", b =>
                 {
                     b.Property<Guid>("SnapshotId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("snapshot_id");
 
                     b.Property<DateTimeOffset>("FetchedAtUtc")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fetched_at_utc");
 
                     b.Property<string>("FromCurrency")
                         .IsRequired()
@@ -178,16 +201,19 @@ namespace ExpenseTracker.Infrastructure.Persistence.Migrations
                     b.Property<string>("Method")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("method");
 
                     b.Property<decimal>("Rate")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("rate");
 
                     b.Property<string>("Source")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("source");
 
                     b.Property<string>("ToCurrency")
                         .IsRequired()
@@ -195,11 +221,13 @@ namespace ExpenseTracker.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(3)")
                         .HasColumnName("to_currency");
 
-                    b.HasKey("SnapshotId");
+                    b.HasKey("SnapshotId")
+                        .HasName("pk_fx_snapshots");
 
-                    b.HasIndex("FromCurrency", "ToCurrency", "FetchedAtUtc");
+                    b.HasIndex("FromCurrency", "ToCurrency", "FetchedAtUtc")
+                        .HasDatabaseName("ix_fx_snapshots_from_currency_to_currency_fetched_at_utc");
 
-                    b.ToTable("FXSnapshots", (string)null);
+                    b.ToTable("fx_snapshots", (string)null);
                 });
 
             modelBuilder.Entity("ExpenseTracker.Domain.MagicLinkToken", b =>
@@ -247,14 +275,18 @@ namespace ExpenseTracker.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_magic_link_tokens");
 
-                    b.HasIndex("ExpiresAtUtc");
+                    b.HasIndex("ExpiresAtUtc")
+                        .HasDatabaseName("ix_magic_link_tokens_expires_at_utc");
 
-                    b.HasIndex("NormalizedEmail");
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("ix_magic_link_tokens_normalized_email");
 
                     b.HasIndex("TokenHash")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_magic_link_tokens_token_hash");
 
                     b.ToTable("magic_link_tokens", (string)null);
                 });
@@ -298,12 +330,15 @@ namespace ExpenseTracker.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_passkey_credentials");
 
                     b.HasIndex("CredentialIdBase64Url")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_passkey_credentials_credential_id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_passkey_credentials_user_id");
 
                     b.ToTable("passkey_credentials", (string)null);
                 });
@@ -339,9 +374,11 @@ namespace ExpenseTracker.Infrastructure.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("status");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_recurring_execution_logs");
 
-                    b.HasIndex("RuleId");
+                    b.HasIndex("RuleId")
+                        .HasDatabaseName("ix_recurring_execution_logs_rule_id");
 
                     b.ToTable("recurring_execution_logs", (string)null);
                 });
@@ -464,11 +501,14 @@ namespace ExpenseTracker.Infrastructure.Persistence.Migrations
                                 .HasColumnName("currency");
                         });
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_recurring_rules");
 
-                    b.HasIndex("NextRunUtc");
+                    b.HasIndex("NextRunUtc")
+                        .HasDatabaseName("ix_recurring_rules_next_run_utc");
 
-                    b.HasIndex("TenantId");
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("ix_recurring_rules_tenant_id");
 
                     b.ToTable("recurring_rules", (string)null);
                 });
@@ -523,16 +563,21 @@ namespace ExpenseTracker.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_refresh_tokens");
 
-                    b.HasIndex("ExpiresAtUtc");
+                    b.HasIndex("ExpiresAtUtc")
+                        .HasDatabaseName("ix_refresh_tokens_expires_at_utc");
 
-                    b.HasIndex("FamilyId");
+                    b.HasIndex("FamilyId")
+                        .HasDatabaseName("ix_refresh_tokens_family_id");
 
                     b.HasIndex("TokenHash")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_refresh_tokens_token_hash");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_refresh_tokens_user_id");
 
                     b.ToTable("refresh_tokens", (string)null);
                 });
@@ -563,7 +608,8 @@ namespace ExpenseTracker.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("name");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_tenants");
 
                     b.ToTable("tenants", (string)null);
                 });
@@ -594,12 +640,15 @@ namespace ExpenseTracker.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_tenant_memberships");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_tenant_memberships_user_id");
 
                     b.HasIndex("TenantId", "UserId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_tenant_memberships_tenant_id_user_id");
 
                     b.ToTable("tenant_memberships", (string)null);
                 });
@@ -670,15 +719,20 @@ namespace ExpenseTracker.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("voided_at_utc");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_transactions");
 
-                    b.HasIndex("ImportBatchId");
+                    b.HasIndex("ImportBatchId")
+                        .HasDatabaseName("ix_transactions_import_batch_id");
 
-                    b.HasIndex("OccurredOn");
+                    b.HasIndex("OccurredOn")
+                        .HasDatabaseName("ix_transactions_occurred_on");
 
-                    b.HasIndex("TenantId");
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("ix_transactions_tenant_id");
 
-                    b.HasIndex("TenantId", "AccountId");
+                    b.HasIndex("TenantId", "AccountId")
+                        .HasDatabaseName("ix_transactions_tenant_id_account_id");
 
                     b.ToTable("transactions", (string)null);
                 });
@@ -754,13 +808,17 @@ namespace ExpenseTracker.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("voided_by_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_transfers");
 
-                    b.HasIndex("DestinationAccountId");
+                    b.HasIndex("DestinationAccountId")
+                        .HasDatabaseName("ix_transfers_destination_account_id");
 
-                    b.HasIndex("SourceAccountId");
+                    b.HasIndex("SourceAccountId")
+                        .HasDatabaseName("ix_transfers_source_account_id");
 
-                    b.HasIndex("TenantId");
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("ix_transfers_tenant_id");
 
                     b.ToTable("transfers", (string)null);
                 });
@@ -831,10 +889,12 @@ namespace ExpenseTracker.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(64)")
                         .HasColumnName("time_zone");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_users");
 
                     b.HasIndex("NormalizedEmail")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_users_normalized_email");
 
                     b.ToTable("users", (string)null);
                 });
@@ -845,7 +905,8 @@ namespace ExpenseTracker.Infrastructure.Persistence.Migrations
                         .WithMany("Memberships")
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_tenant_memberships_tenants_tenant_id");
                 });
 
             modelBuilder.Entity("ExpenseTracker.Domain.Tenant", b =>
