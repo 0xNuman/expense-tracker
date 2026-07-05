@@ -21,6 +21,7 @@ export interface Transaction {
   memo: string | null;
   occurredOn: string;
   isVoided: boolean;
+  categoryId?: string | null;
 }
 
 /** Auth token bundle issued by verify / refresh / passkey completion. */
@@ -45,6 +46,7 @@ export interface CreateTransactionInput {
   currency: string;
   occurredOn: string;
   memo?: string | null;
+  categoryId?: string | null;
 }
 
 const HAL_MEDIA = 'application/hal+json';
@@ -71,7 +73,7 @@ function authHeader(token?: string | null): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-async function halFetch<T>(url: string, init: RequestInit, token?: string | null): Promise<T> {
+export async function halFetch<T>(url: string, init: RequestInit, token?: string | null): Promise<T> {
   const res = await fetch(url, {
     ...init,
     headers: {
@@ -154,6 +156,7 @@ function toTransaction(doc: HalDocument): Transaction {
     amount: state<number>(doc, 'amount'),
     currency: state<string>(doc, 'currency'),
     memo: (doc as Record<string, unknown>).memo as string | null,
+    categoryId: (doc as Record<string, unknown>).categoryId as string | null,
     occurredOn: state<string>(doc, 'occurredOn'),
     isVoided: state<boolean>(doc, 'isVoided'),
   };
@@ -294,8 +297,20 @@ export async function renameAccount(token: string, id: string, name: string): Pr
   return toAccount(doc);
 }
 
+export async function archiveAccount(token: string, id: string): Promise<Account> {
+  const href = `/api/accounts/${encodeURIComponent(id)}/archive`;
+  const doc = await halFetch<HalDocument>(href, { method: 'POST' }, token);
+  return toAccount(doc);
+}
+
 export async function voidTransaction(token: string, id: string, reason?: string): Promise<Transaction> {
   const href = `/api/transactions/${encodeURIComponent(id)}/void`;
   const doc = await halFetch<HalDocument>(href, { method: 'POST', body: JSON.stringify({ reason }) }, token);
+  return toTransaction(doc);
+}
+
+export async function updateTransaction(token: string, id: string, input: Partial<CreateTransactionInput>): Promise<Transaction> {
+  const href = `/api/transactions/${encodeURIComponent(id)}`;
+  const doc = await halFetch<HalDocument>(href, { method: 'PUT', body: JSON.stringify(input) }, token);
   return toTransaction(doc);
 }

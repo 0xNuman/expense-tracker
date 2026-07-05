@@ -172,7 +172,14 @@ public static class TransactionEndpoints
         var sort = req.Query["sort"].ToString();
         if (string.IsNullOrEmpty(sort)) sort = "date";
 
-        return new TransactionQuery(page, pageSize, type, from, to, sort);
+        CategoryId? categoryId = null;
+        var cidStr = req.Query["categoryId"].ToString();
+        if (string.Equals(cidStr, "uncategorized", StringComparison.OrdinalIgnoreCase))
+            categoryId = new CategoryId(Guid.Empty); // Special marker for unassigned
+        else if (Guid.TryParse(cidStr, out var c))
+            categoryId = new CategoryId(c);
+
+        return new TransactionQuery(page, pageSize, type, from, to, sort, categoryId);
     }
 
     private static async Task<IResult> ListTransactionsAsync(
@@ -191,6 +198,14 @@ public static class TransactionEndpoints
             items = items.Where(t => t.OccurredOn >= q.From.Value);
         if (q.To.HasValue)
             items = items.Where(t => t.OccurredOn <= q.To.Value);
+            
+        if (q.CategoryId.HasValue)
+        {
+            if (q.CategoryId.Value.Value == Guid.Empty)
+                items = items.Where(t => t.CategoryId == null);
+            else
+                items = items.Where(t => t.CategoryId == q.CategoryId.Value);
+        }
 
         items = string.Equals(q.Sort, "-date", StringComparison.OrdinalIgnoreCase)
             ? items.OrderByDescending(t => t.OccurredOn).ThenByDescending(t => t.CreatedAtUtc)
@@ -239,6 +254,7 @@ public static class TransactionEndpoints
         if (q.Type.HasValue) sb.Append("&type=").Append(q.Type.Value.ToString());
         if (q.From.HasValue) sb.Append("&from=").Append(q.From.Value.ToString("yyyy-MM-dd"));
         if (q.To.HasValue) sb.Append("&to=").Append(q.To.Value.ToString("yyyy-MM-dd"));
+        if (q.CategoryId.HasValue) sb.Append("&categoryId=").Append(q.CategoryId.Value.Value == Guid.Empty ? "uncategorized" : q.CategoryId.Value.ToString());
         if (!string.IsNullOrEmpty(q.Sort)) sb.Append("&sort=").Append(Uri.EscapeDataString(q.Sort));
         return sb.ToString();
     }
@@ -272,5 +288,6 @@ public static class TransactionEndpoints
         TransactionType? Type,
         DateOnly? From,
         DateOnly? To,
-        string Sort);
+        string Sort,
+        CategoryId? CategoryId);
 }

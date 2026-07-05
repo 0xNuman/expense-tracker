@@ -39,9 +39,13 @@ npm --prefix client run dev
 
 ### Tests
 ```bash
-dotnet test                                # domain invariants
+dotnet test                                # Runs both domain invariants and integration tests against Testcontainers
 npm --prefix client run build              # client typecheck + build
 ```
+Note: Ensure Docker/Podman is running before executing integration tests, as Testcontainers will spin up a transient Postgres instance.
+
+### Secrets
+All secrets required for local development are defaulted in `appsettings.Development.json`. You do not need to set any environment variables or user secrets for local runs.
 
 ## Repository layout
 ```

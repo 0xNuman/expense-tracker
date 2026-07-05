@@ -67,14 +67,20 @@ export function AddAccountForm({
         </select>
       </Field>
       <Field label="Currency">
-        <input
-          type="text"
+        <select
           required
           value={currency}
           onChange={(e) => setCurrency(e.target.value)}
-          maxLength={3}
           className="input"
-        />
+        >
+          <option value="USD">USD - US Dollar</option>
+          <option value="EUR">EUR - Euro</option>
+          <option value="GBP">GBP - British Pound</option>
+          <option value="JPY">JPY - Japanese Yen</option>
+          <option value="INR">INR - Indian Rupee</option>
+          <option value="CAD">CAD - Canadian Dollar</option>
+          <option value="AUD">AUD - Australian Dollar</option>
+        </select>
       </Field>
       <Field label="Opening balance">
         <input

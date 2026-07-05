@@ -13,3 +13,10 @@ public readonly record struct CategoryId(Guid Value) : IStrongId
     public static CategoryId New() => new(Guid.NewGuid());
     public override string ToString() => Value.ToString();
 }
+
+/// <summary>Strongly-typed identifier for an import batch.</summary>
+public readonly record struct ImportBatchId(Guid Value) : IStrongId
+{
+    public static ImportBatchId New() => new(Guid.NewGuid());
+    public override string ToString() => Value.ToString();
+}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { fetchAccounts, fetchTransactions, renameAccount, voidTransaction } from '../hal/api';
+import { fetchAccounts, fetchTransactions, renameAccount, voidTransaction, archiveAccount } from '../hal/api';
 import type { Account, Transaction } from '../hal/api';
 import { useAuth } from '../auth/AuthContext';
 import { Layout } from '../components/Layout';
@@ -7,10 +7,11 @@ import { AccountCard } from '../components/AccountCard';
 import { TransactionList } from '../components/TransactionList';
 import { AddAccountForm } from '../components/AddAccountForm';
 import { AddTransactionForm } from '../components/AddTransactionForm';
+import { TransferForm } from '../components/TransferForm';
 import { Spinner } from '../components/Spinner';
 import { ErrorBanner } from '../components/ErrorBanner';
 
-type Modal = 'none' | 'account' | 'transaction';
+type Modal = 'none' | 'account' | 'transaction' | 'transfer';
 
 export function DashboardPage() {
   const { accessToken } = useAuth();
@@ -19,6 +20,7 @@ export function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [modal, setModal] = useState<Modal>('none');
+  const [transactionToEdit, setTransactionToEdit] = useState<Transaction | undefined>(undefined);
 
   const load = async () => {
     if (!accessToken) return;
@@ -61,6 +63,22 @@ export function DashboardPage() {
     }
   };
 
+  const handleArchiveAccount = async (account: Account) => {
+    if (!accessToken) return;
+    if (!window.confirm(`Are you sure you want to archive the account '${account.name}'?`)) return;
+    try {
+      await archiveAccount(accessToken, account.id);
+      void load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not archive account');
+    }
+  };
+
+  const handleEditTransaction = (t: Transaction) => {
+    setTransactionToEdit(t);
+    setModal('transaction');
+  };
+
   useEffect(() => {
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -98,7 +116,7 @@ export function DashboardPage() {
           ) : (
             <div className="flex flex-col gap-3">
               {accounts.map((a) => (
-                <AccountCard key={a.id} account={a} onRenameRequested={handleRenameAccount} />
+                <AccountCard key={a.id} account={a} onRenameRequested={handleRenameAccount} onArchiveRequested={handleArchiveAccount} />
               ))}
             </div>
           )}
@@ -108,20 +126,32 @@ export function DashboardPage() {
         <section>
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-lg font-semibold">Recent activity</h2>
-            <button
-              type="button"
-              onClick={() => setModal('transaction')}
-              className="rounded-lg bg-sky-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-sky-700 hidden md:block"
-            >
-              + Add
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setModal('transfer')}
+                className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hidden md:block dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+              >
+                Transfer
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setTransactionToEdit(undefined);
+                  setModal('transaction');
+                }}
+                className="rounded-lg bg-sky-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-sky-700 hidden md:block"
+              >
+                + Add
+              </button>
+            </div>
           </div>
           {loading && transactions.length === 0 ? (
             <div className="flex items-center gap-2 text-sm text-slate-500">
               <Spinner /> Loading transactions…
             </div>
           ) : (
-            <TransactionList transactions={transactions} onVoidRequested={handleVoidTransaction} />
+            <TransactionList transactions={transactions} onVoidRequested={handleVoidTransaction} onEditRequested={handleEditTransaction} />
           )}
         </section>
       </div>
@@ -130,7 +160,10 @@ export function DashboardPage() {
       <button
         type="button"
         aria-label="Add transaction"
-        onClick={() => setModal('transaction')}
+        onClick={() => {
+          setTransactionToEdit(undefined);
+          setModal('transaction');
+        }}
         className="fixed bottom-20 right-5 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-sky-600 text-white shadow-lg hover:bg-sky-700 md:hidden"
       >
         +
@@ -148,7 +181,7 @@ export function DashboardPage() {
           >
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-base font-semibold">
-                {modal === 'account' ? 'Add account' : 'Add transaction'}
+                {modal === 'account' ? 'Add account' : modal === 'transfer' ? 'Transfer' : transactionToEdit ? 'Edit transaction' : 'Add transaction'}
               </h3>
               <button type="button" onClick={() => setModal('none')} className="text-slate-400 hover:text-slate-600">
                 ×
@@ -163,15 +196,29 @@ export function DashboardPage() {
                 }}
                 onCancel={() => setModal('none')}
               />
-            ) : (
-              <AddTransactionForm
-                token={accessToken ?? ''}
+            ) : modal === 'transfer' ? (
+              <TransferForm
                 accounts={accounts}
                 onCreated={() => {
                   setModal('none');
                   void load();
                 }}
                 onCancel={() => setModal('none')}
+              />
+            ) : (
+              <AddTransactionForm
+                token={accessToken ?? ''}
+                accounts={accounts}
+                initialData={transactionToEdit}
+                onCreated={() => {
+                  setModal('none');
+                  setTransactionToEdit(undefined);
+                  void load();
+                }}
+                onCancel={() => {
+                  setModal('none');
+                  setTransactionToEdit(undefined);
+                }}
               />
             )}
           </div>

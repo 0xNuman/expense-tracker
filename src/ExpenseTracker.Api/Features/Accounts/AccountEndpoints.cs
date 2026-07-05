@@ -32,6 +32,10 @@ public static class AccountEndpoints
              .WithName("RenameAccount")
              .WithSummary("Rename an existing account.");
 
+        group.MapPost("/{id}/archive", ArchiveAccount)
+             .WithName("ArchiveAccount")
+             .WithSummary("Archive an existing account.");
+
         return app;
     }
 
@@ -141,6 +145,35 @@ public static class AccountEndpoints
         catch (ArgumentException ex)
         {
             return Results.Problem(ex.Message, statusCode: StatusCodes.Status400BadRequest);
+        }
+
+        await db.SaveChangesAsync(ct);
+
+        var balances = await ComputeBalancesAsync(db, new[] { accountId }, ct);
+        var balance = balances.GetValueOrDefault(accountId, account.OpeningBalance.Amount);
+
+        var doc = ToAccountDocument(account, balance);
+        return Results.Extensions.Hal(doc);
+    }
+
+    // ── POST /api/accounts/{id}/archive ──────────────────────────
+    private static async Task<IResult> ArchiveAccount(
+        Guid id,
+        ExpenseTrackerDbContext db,
+        CancellationToken ct)
+    {
+        var accountId = new AccountId(id);
+        var account = await db.Accounts.FirstOrDefaultAsync(a => a.Id == accountId, ct);
+        if (account is null)
+            return Results.Problem("Account not found.", statusCode: StatusCodes.Status404NotFound);
+
+        try
+        {
+            account.Archive();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.Problem(ex.Message, statusCode: StatusCodes.Status409Conflict);
         }
 
         await db.SaveChangesAsync(ct);

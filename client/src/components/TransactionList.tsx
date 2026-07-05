@@ -10,7 +10,7 @@ function dateLabel(occurredOn: string): string {
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-export function TransactionList({ transactions, onVoidRequested }: { transactions: Transaction[]; onVoidRequested?: (t: Transaction) => void }) {
+export function TransactionList({ transactions, onVoidRequested, onEditRequested }: { transactions: Transaction[]; onVoidRequested?: (t: Transaction) => void; onEditRequested?: (t: Transaction) => void }) {
   if (transactions.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
@@ -38,7 +38,7 @@ export function TransactionList({ transactions, onVoidRequested }: { transaction
             {items.map((t) => {
               const isIncome = t.type === 'Income';
               return (
-                <li key={t.id} className={`flex items-center justify-between px-4 py-3 ${t.isVoided ? 'opacity-50 grayscale' : ''}`}>
+                <li key={t.id} className={`group flex items-center justify-between px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${t.isVoided ? 'opacity-50 grayscale' : ''}`}>
                   <div className="flex items-center gap-3">
                     <span
                       aria-hidden
@@ -61,16 +61,26 @@ export function TransactionList({ transactions, onVoidRequested }: { transaction
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    {!t.isVoided && onVoidRequested && (
-                      <button
-                        type="button"
-                        onClick={() => onVoidRequested(t)}
-                        className="text-[10px] uppercase tracking-wider text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                        style={{ opacity: 1 /* fallback for simple hover without group */ }}
-                      >
-                        Void
-                      </button>
-                    )}
+                    <div className="flex gap-2 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+                      {!t.isVoided && onEditRequested && (
+                        <button
+                          type="button"
+                          onClick={() => onEditRequested(t)}
+                          className="rounded px-2 py-1 text-xs font-medium text-slate-500 hover:bg-slate-200 hover:text-slate-900 dark:hover:bg-slate-700 dark:hover:text-slate-100"
+                        >
+                          Edit
+                        </button>
+                      )}
+                      {!t.isVoided && onVoidRequested && (
+                        <button
+                          type="button"
+                          onClick={() => onVoidRequested(t)}
+                          className="rounded px-2 py-1 text-xs font-medium text-rose-500 hover:bg-rose-100 hover:text-rose-700 dark:hover:bg-rose-900/30"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
                     <span
                       className={`font-mono text-sm tabular-nums ${
                         isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'

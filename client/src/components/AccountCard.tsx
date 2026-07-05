@@ -8,10 +8,10 @@ const TYPE_GLYPH: Record<string, string> = {
   Prepaid: '🎫',
 };
 
-export function AccountCard({ account, onRenameRequested }: { account: Account; onRenameRequested?: (account: Account) => void }) {
+export function AccountCard({ account, onRenameRequested, onArchiveRequested }: { account: Account; onRenameRequested?: (account: Account) => void; onArchiveRequested?: (account: Account) => void }) {
   const glyph = TYPE_GLYPH[account.type] ?? '•';
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+    <div className="group flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span aria-hidden className="text-lg">
@@ -20,15 +20,26 @@ export function AccountCard({ account, onRenameRequested }: { account: Account; 
           <div>
             <div className="flex items-center gap-2">
               <p className="font-medium leading-tight">{account.name}</p>
-              {onRenameRequested && (
-                <button
-                  type="button"
-                  onClick={() => onRenameRequested(account)}
-                  className="text-[10px] uppercase tracking-wider text-slate-400 hover:text-sky-600 dark:hover:text-sky-400"
-                >
-                  Rename
-                </button>
-              )}
+              <div className="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+                {onRenameRequested && (
+                  <button
+                    type="button"
+                    className="rounded px-2 py-1 text-xs font-medium text-slate-500 hover:bg-slate-200 hover:text-slate-900 dark:hover:bg-slate-700 dark:hover:text-slate-100"
+                    onClick={() => onRenameRequested(account)}
+                  >
+                    Rename
+                  </button>
+                )}
+                {!account.isArchived && onArchiveRequested && (
+                  <button
+                    type="button"
+                    className="rounded px-2 py-1 text-xs font-medium text-rose-500 hover:bg-rose-100 hover:text-rose-700 dark:hover:bg-rose-900/30"
+                    onClick={() => onArchiveRequested(account)}
+                  >
+                    Archive
+                  </button>
+                )}
+              </div>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               {account.type} · {account.currency}

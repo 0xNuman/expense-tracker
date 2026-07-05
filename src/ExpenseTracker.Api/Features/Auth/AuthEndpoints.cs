@@ -206,6 +206,13 @@ group.MapPost("/switch-tenant", SwitchTenant)
             // alongside the tenant (IReadOnlyCollection navigation isn't auto-detected).
             foreach (var m in tenant.Memberships)
                 db.TenantMemberships.Add(m);
+
+            db.Set<Category>().AddRange(
+                Category.Create(tenant.Id, "Food", CategoryKind.Expense, sortOrder: 1),
+                Category.Create(tenant.Id, "Transport", CategoryKind.Expense, sortOrder: 2),
+                Category.Create(tenant.Id, "Utilities", CategoryKind.Expense, sortOrder: 3),
+                Category.Create(tenant.Id, "Salary", CategoryKind.Income, sortOrder: 4)
+            );
         }
 
         // Mark token consumed.

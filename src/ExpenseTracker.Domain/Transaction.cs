@@ -26,6 +26,8 @@ public sealed class Transaction : AggregateRoot
     public UserId CreatedByUserId { get; private set; }
     public bool IsVoided { get; private set; }
     public DateTimeOffset? VoidedAtUtc { get; private set; }
+    public ImportBatchId? ImportBatchId { get; private set; }
+    public List<string> Tags { get; private set; } = new();
 
     private Transaction() { }
 
@@ -38,7 +40,9 @@ public sealed class Transaction : AggregateRoot
         DateOnly occurredOn,
         UserId createdByUserId,
         CategoryId? categoryId = null,
-        string? memo = null)
+        string? memo = null,
+        ImportBatchId? importBatchId = null,
+        IEnumerable<string>? tags = null)
     {
         if (amount <= 0m) throw new ArgumentException("Amount must be positive.", nameof(amount));
         if (occurredOn > DateOnly.FromDateTime(DateTimeOffset.UtcNow.Date.AddDays(1)))
@@ -56,7 +60,9 @@ public sealed class Transaction : AggregateRoot
             CreatedAtUtc = DateTimeOffset.UtcNow,
             CreatedByUserId = createdByUserId,
             CategoryId = categoryId,
-            Memo = memo,
+            Memo = memo?.Trim(),
+            ImportBatchId = importBatchId,
+            Tags = tags?.ToList() ?? new List<string>(),
             IsVoided = false
         };
         txn.Raise(new TransactionCreated(txn.Id, tenantId, accountId, type, txn.Amount, currency, occurredOn, txn.CreatedAtUtc));

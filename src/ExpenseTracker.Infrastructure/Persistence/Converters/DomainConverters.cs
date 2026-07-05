@@ -68,4 +68,22 @@ public static class DomainConverters
     /// <summary>Converts <see cref="UserId"/> to/from nullable <see cref="Guid"/>.</summary>
     public static readonly ValueConverter<UserId?, Guid?> NullableUserIdConverter =
         new(v => v.HasValue ? v.Value.Value : null, g => g.HasValue ? new UserId(g.Value) : null);
+
+    public static readonly ValueConverter<TransferId, Guid> TransferIdConverter =
+        new(v => v.Value, g => new TransferId(g));
+
+    public static readonly ValueConverter<RecurringRuleId, Guid> RecurringRuleIdConverter =
+        new(v => v.Value, g => new RecurringRuleId(g));
+
+    public static readonly ValueConverter<RecurringExecutionLogId, Guid> RecurringExecutionLogIdConverter =
+        new(v => v.Value, g => new RecurringExecutionLogId(g));
+
+    public static readonly ValueConverter<TransactionId?, Guid?> NullableTransactionIdConverter =
+        new(v => v.HasValue ? v.Value.Value : null, g => g.HasValue ? new TransactionId(g.Value) : null);
+
+    public static readonly ValueConverter<ImportBatchId, Guid> ImportBatchIdConverter =
+        new(v => v.Value, g => new ImportBatchId(g));
+        
+    public static readonly ValueConverter<ImportBatchId?, Guid?> NullableImportBatchIdConverter =
+        new(v => v.HasValue ? v.Value.Value : null, g => g.HasValue ? new ImportBatchId(g.Value) : null);
 }

@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Account, Transaction } from '../hal/api';
-import { createTransaction } from '../hal/api';
+import { createTransaction, updateTransaction } from '../hal/api';
 import { ErrorBanner } from './ErrorBanner';
 import { Spinner } from './Spinner';
+import { fetchCategories } from '../features/categories/CategoriesTree';
+import type { Category } from '../features/categories/CategoriesTree';
 
 const TYPES = ['Expense', 'Income'] as const;
 
@@ -10,22 +12,30 @@ export function AddTransactionForm({
   token,
   accounts,
   defaultAccountId,
+  initialData,
   onCreated,
   onCancel,
 }: {
   token: string;
   accounts: Account[];
   defaultAccountId?: string;
+  initialData?: Transaction;
   onCreated?: (txn: Transaction) => void;
   onCancel?: () => void;
 }) {
-  const [type, setType] = useState<(typeof TYPES)[number]>('Expense');
-  const [amount, setAmount] = useState('');
-  const [accountId, setAccountId] = useState(defaultAccountId ?? accounts[0]?.id ?? '');
-  const [occurredOn, setOccurredOn] = useState(() => new Date().toISOString().slice(0, 10));
-  const [memo, setMemo] = useState('');
+  const [type, setType] = useState<(typeof TYPES)[number]>(initialData?.type ?? 'Expense');
+  const [amount, setAmount] = useState(initialData?.amount.toString() ?? '');
+  const [accountId, setAccountId] = useState(initialData?.accountId ?? defaultAccountId ?? accounts[0]?.id ?? '');
+  const [occurredOn, setOccurredOn] = useState(() => initialData?.occurredOn.slice(0, 10) ?? new Date().toISOString().slice(0, 10));
+  const [memo, setMemo] = useState(initialData?.memo ?? '');
+  const [categoryId, setCategoryId] = useState(initialData?.categoryId ?? '');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    if (token) fetchCategories(token, false).then(setCategories).catch(console.error);
+  }, [token]);
 
   const selectedAccount = accounts.find((a) => a.id === accountId);
 
@@ -39,13 +49,26 @@ export function AddTransactionForm({
     setError(null);
     setSubmitting(true);
     try {
-      const txn = await createTransaction(token, accountId, {
-        type,
-        amount: Number(amount) || 0,
-        currency: selectedAccount?.currency ?? 'USD',
-        occurredOn,
-        memo: memo.trim() || null,
-      });
+      let txn;
+      if (initialData) {
+        txn = await updateTransaction(token, initialData.id, {
+          type,
+          amount: Number(amount) || 0,
+          currency: selectedAccount?.currency ?? 'USD',
+          occurredOn,
+          memo: memo.trim() || null,
+          categoryId: categoryId || null,
+        });
+      } else {
+        txn = await createTransaction(token, accountId, {
+          type,
+          amount: Number(amount) || 0,
+          currency: selectedAccount?.currency ?? 'USD',
+          occurredOn,
+          memo: memo.trim() || null,
+          categoryId: categoryId || null,
+        });
+      }
       onCreated?.(txn);
       setAmount('');
       setMemo('');
@@ -94,6 +117,16 @@ export function AddTransactionForm({
       <Field label="Date">
         <input type="date" required value={occurredOn} onChange={(e) => setOccurredOn(e.target.value)} className="input" />
       </Field>
+      <Field label="Category">
+        <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="input">
+          <option value="">None</option>
+          {categories.filter(c => c.kind === type || c.kind === 'Either').map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+      </Field>
       <Field label="Memo">
         <input type="text" value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="Optional" className="input" />
       </Field>
@@ -104,7 +137,7 @@ export function AddTransactionForm({
           className="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-white font-medium hover:bg-sky-700 disabled:opacity-60"
         >
           {submitting && <Spinner />}
-          Save transaction
+          {initialData ? 'Update transaction' : 'Save transaction'}
         </button>
         {onCancel && (
           <button type="button" onClick={onCancel} className="rounded-lg px-3 py-2 text-sm text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">

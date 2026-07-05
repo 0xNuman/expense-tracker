@@ -92,7 +92,7 @@ export class HalClient {
     return token ? { Authorization: `Bearer ${token}` } : {};
   }
 
-  private async get<T>(url: string, signal?: AbortSignal | null, init?: RequestInit): Promise<T> {
+  public async get<T>(url: string, signal?: AbortSignal | null, init?: RequestInit): Promise<T> {
     const headers: Record<string, string> = { Accept: HAL_MEDIA, ...this.authHeaders(), ...(init?.headers as Record<string, string> | undefined) };
     const res = await fetch(url, {
       ...init,

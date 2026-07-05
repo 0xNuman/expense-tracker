@@ -7,7 +7,7 @@ namespace ExpenseTracker.Api.Hal;
 /// A minimal HAL document model supporting <c>_links</c> and <c>_embedded</c>.
 /// Renders as JSON per draft-kelly-json-hal with the <c>application/hal+json</c> media type.
 /// </summary>
-public sealed class HalDocument
+public class HalDocument
 {
     private readonly Dictionary<string, object> _links = new(StringComparer.Ordinal);
     private readonly Dictionary<string, object> _embedded = new(StringComparer.Ordinal);

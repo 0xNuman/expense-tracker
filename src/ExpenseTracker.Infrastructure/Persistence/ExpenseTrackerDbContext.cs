@@ -28,6 +28,12 @@ public class ExpenseTrackerDbContext : DbContext
     public DbSet<PasskeyCredential> PasskeyCredentials => Set<PasskeyCredential>();
     public DbSet<Account> Accounts => Set<Account>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
+    public DbSet<Category> Categories => Set<Category>();
+    public DbSet<Transfer> Transfers => Set<Transfer>();
+    public DbSet<RecurringRule> RecurringRules => Set<RecurringRule>();
+    public DbSet<RecurringExecutionLog> RecurringExecutionLogs => Set<RecurringExecutionLog>();
+    public DbSet<CachedRate> CachedRates => Set<CachedRate>();
+    public DbSet<FXSnapshot> FXSnapshots => Set<FXSnapshot>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -43,5 +49,14 @@ public class ExpenseTrackerDbContext : DbContext
 
         modelBuilder.Entity<Transaction>()
             .HasQueryFilter(t => t.TenantId == _tenantContext.ActiveTenantId);
+
+        modelBuilder.Entity<Category>()
+            .HasQueryFilter(c => c.TenantId == _tenantContext.ActiveTenantId);
+
+        modelBuilder.Entity<Transfer>()
+            .HasQueryFilter(t => t.TenantId == _tenantContext.ActiveTenantId);
+
+        modelBuilder.Entity<RecurringRule>()
+            .HasQueryFilter(r => r.TenantId == _tenantContext.ActiveTenantId);
     }
 }

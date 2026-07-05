@@ -4,6 +4,9 @@ import { Layout } from '../components/Layout';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { Spinner } from '../components/Spinner';
 import { beginPasskeyRegistration, completePasskeyRegistration } from '../hal/api';
+import { CategoriesTree } from '../features/categories/CategoriesTree';
+import { RecurringRulesList } from '../features/recurring-rules/RecurringRulesList';
+import { FxRatesSettings } from '../components/fx/FxRatesSettings';
 
 function base64UrlToBuffer(b64url: string): ArrayBuffer {
   const pad = '='.repeat((4 - (b64url.length % 4)) % 4);
@@ -26,6 +29,7 @@ export function SettingsPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('account');
 
   const handleAddPasskey = async () => {
     if (!accessToken) return;
@@ -78,11 +82,31 @@ export function SettingsPage() {
 
   return (
     <Layout>
-      <div className="mx-auto max-w-2xl">
-        <h2 className="text-lg font-semibold">Settings</h2>
+      <div className="mx-auto max-w-4xl flex flex-col md:flex-row gap-6">
+        <aside className="w-full md:w-64 shrink-0">
+          <nav className="flex flex-col gap-1">
+            {['account', 'categories', 'recurring', 'csv', 'fx'].map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setActiveTab(tab)}
+                className={`text-left px-3 py-2 rounded-lg text-sm font-medium capitalize ${
+                  activeTab === tab
+                    ? 'bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300'
+                    : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+                }`}
+              >
+                {tab === 'csv' ? 'CSV Import/Export' : tab === 'fx' ? 'FX Rates' : tab}
+              </button>
+            ))}
+          </nav>
+        </aside>
 
-        <section className="mt-4 rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-          <h3 className="font-medium">Account</h3>
+        <div className="flex-1">
+          {activeTab === 'account' && (
+            <>
+              <section className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+                <h3 className="font-medium">Account</h3>
           <dl className="mt-2 grid grid-cols-2 gap-2 text-sm">
             <dt className="text-slate-500 dark:text-slate-400">Email</dt>
             <dd>{user.email ?? '—'}</dd>
@@ -114,8 +138,38 @@ export function SettingsPage() {
           >
             {busy && <Spinner />}
             Add passkey
-          </button>
-        </section>
+              </button>
+            </section>
+          </>
+        )}
+        
+        {activeTab === 'categories' && (
+          <section className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+            <h3 className="font-medium mb-4">Categories</h3>
+            <CategoriesTree />
+          </section>
+        )}
+
+        {activeTab === 'recurring' && (
+          <section className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+            <h3 className="font-medium mb-4">Recurring Rules</h3>
+            <RecurringRulesList tenantId={user.tenantId!} />
+          </section>
+        )}
+
+        {activeTab === 'csv' && (
+          <section className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+            <h3 className="font-medium mb-4">CSV Import/Export</h3>
+            <p className="text-sm text-slate-500 mb-4">Select an account from the dashboard to import CSV data. (Global import coming soon).</p>
+          </section>
+        )}
+
+        {activeTab === 'fx' && (
+          <section className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+            <FxRatesSettings />
+          </section>
+        )}
+        </div>
       </div>
     </Layout>
   );

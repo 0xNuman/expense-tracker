@@ -54,8 +54,16 @@ public sealed class TransactionConfiguration : IEntityTypeConfiguration<Transact
 
         b.Ignore(t => t.Events);
 
+        b.Property(t => t.ImportBatchId)
+            .HasConversion(DomainConverters.NullableImportBatchIdConverter)
+            .HasColumnName("import_batch_id");
+
+        b.Property(t => t.Tags)
+            .HasColumnName("tags"); // PostgreSQL natively maps List<string> to text[]
+
         b.HasIndex(t => new { t.TenantId, t.AccountId });
         b.HasIndex(t => t.OccurredOn);
         b.HasIndex(t => t.TenantId);
+        b.HasIndex(t => t.ImportBatchId);
     }
 }

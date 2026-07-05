@@ -26,8 +26,20 @@ export function Layout({ children }: { children: ReactNode }) {
               </span>
             )}
           </div>
-          <div className="flex items-center gap-3">
-            {user.email && (
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => {
+                document.documentElement.classList.toggle('dark');
+                localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+              }}
+              className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
+              aria-label="Toggle dark mode"
+            >
+              🌓
+            </button>
+            <div className="flex items-center gap-3">
+              {user.email && (
               <span className="hidden text-xs text-slate-500 dark:text-slate-400 sm:inline">
                 {user.email}
               </span>
@@ -41,6 +53,7 @@ export function Layout({ children }: { children: ReactNode }) {
                 Log out
               </button>
             )}
+            </div>
           </div>
         </div>
       </header>

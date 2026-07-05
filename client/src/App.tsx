@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './auth/AuthContext';
 import { LoginPage } from './pages/LoginPage';
@@ -21,6 +22,14 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 
 function App() {
   const { bootstrapped } = useAuth();
+
+  useEffect(() => {
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
 
   if (!bootstrapped) {
     return (
