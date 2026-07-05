@@ -100,7 +100,7 @@ export function DashboardPage() {
             <button
               type="button"
               onClick={() => setModal('account')}
-              className="rounded-lg bg-sky-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-sky-700"
+              className="rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-md transition-all hover:scale-105 hover:shadow-lg"
             >
               + Add
             </button>
@@ -130,7 +130,7 @@ export function DashboardPage() {
               <button
                 type="button"
                 onClick={() => setModal('transfer')}
-                className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hidden md:block dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition-all hover:bg-slate-50 hover:scale-105 hidden md:block dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 Transfer
               </button>
@@ -140,7 +140,7 @@ export function DashboardPage() {
                   setTransactionToEdit(undefined);
                   setModal('transaction');
                 }}
-                className="rounded-lg bg-sky-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-sky-700 hidden md:block"
+                className="rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-md transition-all hover:scale-105 hover:shadow-lg hidden md:block"
               >
                 + Add
               </button>
@@ -164,7 +164,7 @@ export function DashboardPage() {
           setTransactionToEdit(undefined);
           setModal('transaction');
         }}
-        className="fixed bottom-20 right-5 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-sky-600 text-white shadow-lg hover:bg-sky-700 md:hidden"
+        className="fixed bottom-20 right-5 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-xl transition-transform hover:scale-110 active:scale-95 md:hidden"
       >
         +
       </button>
@@ -172,11 +172,11 @@ export function DashboardPage() {
       {/* Modal */}
       {modal !== 'none' && (
         <div
-          className="fixed inset-0 z-40 flex items-end justify-center bg-slate-900/50 p-0 sm:items-center sm:p-4"
+          className="fixed inset-0 z-40 flex items-end justify-center bg-slate-900/30 backdrop-blur-sm p-0 sm:items-center sm:p-4 transition-all"
           onClick={() => setModal('none')}
         >
           <div
-            className="w-full max-w-md rounded-t-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 sm:rounded-2xl"
+            className="w-full max-w-md rounded-t-3xl border border-slate-200/50 bg-white/95 p-6 shadow-2xl backdrop-blur-xl dark:border-slate-700/50 dark:bg-slate-900/95 sm:rounded-3xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">

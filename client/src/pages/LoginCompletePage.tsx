@@ -35,8 +35,12 @@ export function LoginCompletePage() {
   }, [token, login, navigate]);
 
   return (
-    <div className="flex min-h-full items-center justify-center bg-slate-50 px-4 dark:bg-slate-950">
-      <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 px-4 dark:bg-slate-950">
+      {/* Decorative background blobs */}
+      <div className="absolute top-[-10%] left-[-10%] h-[500px] w-[500px] rounded-full bg-sky-400/20 blur-[100px] dark:bg-sky-600/20" />
+      <div className="absolute bottom-[-10%] right-[-10%] h-[500px] w-[500px] rounded-full bg-indigo-400/20 blur-[100px] dark:bg-indigo-600/20" />
+      
+      <div className="relative z-10 w-full max-w-sm glass rounded-2xl p-8 text-center shadow-2xl">
         {error ? (
           <div className="flex flex-col gap-4">
             <ErrorBanner message={error} />

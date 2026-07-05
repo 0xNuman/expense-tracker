@@ -34,7 +34,7 @@ export function TransactionList({ transactions, onVoidRequested, onEditRequested
           <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
             {label}
           </h3>
-          <ul className="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white dark:divide-slate-800 dark:border-slate-800 dark:bg-slate-900">
+          <ul className="divide-y divide-slate-100 overflow-hidden glass rounded-xl shadow-sm dark:divide-slate-800">
             {items.map((t) => {
               const isIncome = t.type === 'Income';
               return (

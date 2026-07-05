@@ -16,7 +16,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-full bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80">
+      <header className="sticky top-0 z-20 glass border-b border-slate-200 dark:border-slate-800">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <div className="flex items-baseline gap-2">
             <span className="text-lg font-semibold tracking-tight">Expense Tracker</span>
@@ -33,7 +33,7 @@ export function Layout({ children }: { children: ReactNode }) {
                 document.documentElement.classList.toggle('dark');
                 localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
               }}
-              className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
+              className="cursor-pointer text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
               aria-label="Toggle dark mode"
             >
               🌓
@@ -66,6 +66,7 @@ export function Layout({ children }: { children: ReactNode }) {
               <NavLink
                 to="/"
                 end
+                viewTransition
                 className={({ isActive }) =>
                   `${navItem} ${isActive ? 'bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'}`
                 }
@@ -76,6 +77,7 @@ export function Layout({ children }: { children: ReactNode }) {
             <li>
               <NavLink
                 to="/settings"
+                viewTransition
                 className={({ isActive }) =>
                   `${navItem} ${isActive ? 'bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'}`
                 }
@@ -90,12 +92,13 @@ export function Layout({ children }: { children: ReactNode }) {
       </div>
 
       {/* Bottom nav (mobile) */}
-      <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90 md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-20 glass border-t border-slate-200 dark:border-slate-800 md:hidden">
         <ul className="flex">
           <li className="flex-1">
             <NavLink
               to="/"
               end
+              viewTransition
               className={({ isActive }) =>
                 `flex flex-col items-center py-2 text-xs ${isActive ? 'text-sky-600 dark:text-sky-400' : 'text-slate-500 dark:text-slate-400'}`
               }
@@ -106,6 +109,7 @@ export function Layout({ children }: { children: ReactNode }) {
           <li className="flex-1">
             <NavLink
               to="/settings"
+              viewTransition
               className={({ isActive }) =>
                 `flex flex-col items-center py-2 text-xs ${isActive ? 'text-sky-600 dark:text-sky-400' : 'text-slate-500 dark:text-slate-400'}`
               }

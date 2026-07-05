@@ -88,13 +88,17 @@ export function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-full items-center justify-center bg-slate-50 px-4 py-10 dark:bg-slate-950">
-      <div className="w-full max-w-sm">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-950">
+      {/* Decorative background blobs for glassmorphism */}
+      <div className="absolute top-[-10%] left-[-10%] h-[500px] w-[500px] rounded-full bg-sky-400/20 blur-[100px] dark:bg-sky-600/20" />
+      <div className="absolute bottom-[-10%] right-[-10%] h-[500px] w-[500px] rounded-full bg-indigo-400/20 blur-[100px] dark:bg-indigo-600/20" />
+      
+      <div className="relative z-10 w-full max-w-sm">
         <div className="mb-6 text-center">
           <h1 className="text-2xl font-semibold tracking-tight">Expense Tracker</h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Sign in to track your spending</p>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="glass rounded-2xl p-8 shadow-2xl">
           {sent ? (
             <div className="text-center">
               <p className="font-medium">Check your email</p>
@@ -127,7 +131,7 @@ export function LoginPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-sky-600 px-4 py-2.5 text-white font-medium hover:bg-sky-700 disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 px-4 py-3 text-white font-medium transition-all hover:scale-[1.02] hover:shadow-lg disabled:opacity-60 disabled:hover:scale-100"
               >
                 {submitting && <Spinner />}
                 Send magic link
@@ -138,7 +142,7 @@ export function LoginPage() {
               <button
                 type="button"
                 onClick={handlePasskey}
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white/50 px-4 py-3 text-sm font-medium text-slate-700 transition-all hover:bg-slate-100 hover:scale-[1.02] dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-200 dark:hover:bg-slate-800"
               >
                 🔑 Sign in with passkey
               </button>
