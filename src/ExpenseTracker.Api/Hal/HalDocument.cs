@@ -61,7 +61,7 @@ public sealed class HalDocument
         return this;
     }
 
-    public string ToJson(JsonSerializerOptions? options = null)
+    public JsonNode ToJsonNode(JsonSerializerOptions? options = null)
     {
         options ??= HalJson.SerializerOptions;
         var node = new JsonObject();
@@ -78,9 +78,32 @@ public sealed class HalDocument
 
         if (_embedded.Count > 0)
         {
-            node["_embedded"] = JsonSerializer.SerializeToNode(_embedded, options);
+            var embeddedNode = new JsonObject();
+            foreach (var (key, value) in _embedded)
+            {
+                if (value is HalDocument singleDoc)
+                {
+                    embeddedNode[key] = singleDoc.ToJsonNode(options);
+                }
+                else if (value is IEnumerable<HalDocument> docCollection)
+                {
+                    var array = new JsonArray();
+                    foreach (var doc in docCollection)
+                    {
+                        array.Add(doc.ToJsonNode(options));
+                    }
+                    embeddedNode[key] = array;
+                }
+                else
+                {
+                    embeddedNode[key] = JsonSerializer.SerializeToNode(value, options);
+                }
+            }
+            node["_embedded"] = embeddedNode;
         }
 
-        return node.ToJsonString(options);
+        return node;
     }
+
+    public string ToJson(JsonSerializerOptions? options = null) => ToJsonNode(options).ToJsonString(options);
 }

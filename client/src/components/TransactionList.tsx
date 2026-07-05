@@ -10,7 +10,7 @@ function dateLabel(occurredOn: string): string {
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-export function TransactionList({ transactions }: { transactions: Transaction[] }) {
+export function TransactionList({ transactions, onVoidRequested }: { transactions: Transaction[]; onVoidRequested?: (t: Transaction) => void }) {
   if (transactions.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
@@ -38,7 +38,7 @@ export function TransactionList({ transactions }: { transactions: Transaction[] 
             {items.map((t) => {
               const isIncome = t.type === 'Income';
               return (
-                <li key={t.id} className="flex items-center justify-between px-4 py-3">
+                <li key={t.id} className={`flex items-center justify-between px-4 py-3 ${t.isVoided ? 'opacity-50 grayscale' : ''}`}>
                   <div className="flex items-center gap-3">
                     <span
                       aria-hidden
@@ -51,20 +51,35 @@ export function TransactionList({ transactions }: { transactions: Transaction[] 
                       {isIncome ? '↑' : '↓'}
                     </span>
                     <div>
-                      <p className="text-sm font-medium">{t.memo ?? (isIncome ? 'Income' : 'Expense')}</p>
+                      <div className="flex items-center gap-2">
+                        <p className={`text-sm font-medium ${t.isVoided ? 'line-through' : ''}`}>{t.memo ?? (isIncome ? 'Income' : 'Expense')}</p>
+                        {t.isVoided && <span className="text-[10px] font-bold uppercase text-slate-400">Voided</span>}
+                      </div>
                       <p className="text-xs text-slate-500 dark:text-slate-400">
                         {t.type} · {t.currency}
                       </p>
                     </div>
                   </div>
-                  <span
-                    className={`font-mono text-sm tabular-nums ${
-                      isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
-                    }`}
-                  >
-                    {isIncome ? '+' : '−'}
-                    {t.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
+                  <div className="flex items-center gap-4">
+                    {!t.isVoided && onVoidRequested && (
+                      <button
+                        type="button"
+                        onClick={() => onVoidRequested(t)}
+                        className="text-[10px] uppercase tracking-wider text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                        style={{ opacity: 1 /* fallback for simple hover without group */ }}
+                      >
+                        Void
+                      </button>
+                    )}
+                    <span
+                      className={`font-mono text-sm tabular-nums ${
+                        isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                      } ${t.isVoided ? 'line-through' : ''}`}
+                    >
+                      {isIncome ? '+' : '−'}
+                      {t.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
                 </li>
               );
             })}

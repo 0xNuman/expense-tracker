@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { fetchAccounts, fetchTransactions } from '../hal/api';
+import { fetchAccounts, fetchTransactions, renameAccount, voidTransaction } from '../hal/api';
 import type { Account, Transaction } from '../hal/api';
 import { useAuth } from '../auth/AuthContext';
 import { Layout } from '../components/Layout';
@@ -35,6 +35,29 @@ export function DashboardPage() {
       setError(err instanceof Error ? err.message : 'Could not load data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRenameAccount = async (account: Account) => {
+    if (!accessToken) return;
+    const newName = window.prompt(`Rename account '${account.name}' to:`, account.name);
+    if (!newName || newName === account.name) return;
+    try {
+      await renameAccount(accessToken, account.id, newName);
+      void load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not rename account');
+    }
+  };
+
+  const handleVoidTransaction = async (t: Transaction) => {
+    if (!accessToken) return;
+    if (!window.confirm(`Are you sure you want to void this ${t.amount} ${t.currency} transaction?`)) return;
+    try {
+      await voidTransaction(accessToken, t.id, 'Voided by user');
+      void load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not void transaction');
     }
   };
 
@@ -75,7 +98,7 @@ export function DashboardPage() {
           ) : (
             <div className="flex flex-col gap-3">
               {accounts.map((a) => (
-                <AccountCard key={a.id} account={a} />
+                <AccountCard key={a.id} account={a} onRenameRequested={handleRenameAccount} />
               ))}
             </div>
           )}
@@ -85,13 +108,20 @@ export function DashboardPage() {
         <section>
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-lg font-semibold">Recent activity</h2>
+            <button
+              type="button"
+              onClick={() => setModal('transaction')}
+              className="rounded-lg bg-sky-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-sky-700 hidden md:block"
+            >
+              + Add
+            </button>
           </div>
           {loading && transactions.length === 0 ? (
             <div className="flex items-center gap-2 text-sm text-slate-500">
               <Spinner /> Loading transactions…
             </div>
           ) : (
-            <TransactionList transactions={transactions} />
+            <TransactionList transactions={transactions} onVoidRequested={handleVoidTransaction} />
           )}
         </section>
       </div>

@@ -8,7 +8,7 @@ const TYPE_GLYPH: Record<string, string> = {
   Prepaid: '🎫',
 };
 
-export function AccountCard({ account }: { account: Account }) {
+export function AccountCard({ account, onRenameRequested }: { account: Account; onRenameRequested?: (account: Account) => void }) {
   const glyph = TYPE_GLYPH[account.type] ?? '•';
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
@@ -18,7 +18,18 @@ export function AccountCard({ account }: { account: Account }) {
             {glyph}
           </span>
           <div>
-            <p className="font-medium leading-tight">{account.name}</p>
+            <div className="flex items-center gap-2">
+              <p className="font-medium leading-tight">{account.name}</p>
+              {onRenameRequested && (
+                <button
+                  type="button"
+                  onClick={() => onRenameRequested(account)}
+                  className="text-[10px] uppercase tracking-wider text-slate-400 hover:text-sky-600 dark:hover:text-sky-400"
+                >
+                  Rename
+                </button>
+              )}
+            </div>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               {account.type} · {account.currency}
             </p>

@@ -287,3 +287,15 @@ export async function completePasskeyRegistration(
     throw new Error(`complete-registration failed: ${res.status}${body ? ` — ${body}` : ''}`);
   }
 }
+
+export async function renameAccount(token: string, id: string, name: string): Promise<Account> {
+  const href = `/api/accounts/${encodeURIComponent(id)}`;
+  const doc = await halFetch<HalDocument>(href, { method: 'PATCH', body: JSON.stringify({ name }) }, token);
+  return toAccount(doc);
+}
+
+export async function voidTransaction(token: string, id: string, reason?: string): Promise<Transaction> {
+  const href = `/api/transactions/${encodeURIComponent(id)}/void`;
+  const doc = await halFetch<HalDocument>(href, { method: 'POST', body: JSON.stringify({ reason }) }, token);
+  return toTransaction(doc);
+}
