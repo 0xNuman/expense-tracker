@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Caching.Memory;
 using System.Threading.RateLimiting;
+using ExpenseTracker.Api.Auth;
 
 namespace ExpenseTracker.Api;
 

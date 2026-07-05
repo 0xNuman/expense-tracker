@@ -1,4 +1,3 @@
-using ExpenseTracker.Api.Auth;
 using ExpenseTracker.Infrastructure.Auth;
 using ExpenseTracker.Infrastructure.Email;
 using ExpenseTracker.Infrastructure.Persistence;
@@ -6,7 +5,7 @@ using Fido2NetLib;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 
-namespace ExpenseTracker.Api;
+namespace ExpenseTracker.Api.Auth;
 
 /// <summary>Wires authentication (JWT bearer) + email + auth services.</summary>
 public static class AuthSetup
