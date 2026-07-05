@@ -10,7 +10,6 @@ public sealed class TenantMembershipConfiguration : IEntityTypeConfiguration<Ten
 {
     public void Configure(EntityTypeBuilder<TenantMembership> b)
     {
-        b.ToTable("tenant_memberships");
         b.HasKey(m => m.Id);
 
         b.Property(m => m.Id)

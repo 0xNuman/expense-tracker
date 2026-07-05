@@ -10,7 +10,6 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> b)
     {
-        b.ToTable("users");
         b.HasKey(u => u.Id);
 
         b.Property(u => u.Id)
@@ -32,7 +31,6 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         b.Property(u => u.TimeZone).HasColumnName("time_zone").HasMaxLength(64).IsRequired();
         b.Property(u => u.PreferredLocale).HasColumnName("preferred_locale").HasMaxLength(16).IsRequired();
         b.Property(u => u.CreatedAtUtc).HasColumnName("created_at_utc").IsRequired();
-        b.Property(u => u.LastLoginAtUtc).HasColumnName("last_login_at_utc");
         b.Property(u => u.IsPending).HasColumnName("is_pending").IsRequired();
         b.Property(u => u.EmailConfirmed).HasColumnName("email_confirmed").IsRequired();
 

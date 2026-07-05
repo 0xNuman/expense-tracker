@@ -8,11 +8,7 @@ public class FXSnapshotConfiguration : IEntityTypeConfiguration<FXSnapshot>
 {
     public void Configure(EntityTypeBuilder<FXSnapshot> builder)
     {
-        builder.ToTable("fx_snapshots");
-
         builder.HasKey(x => x.SnapshotId);
-        builder.Property(x => x.SnapshotId).HasColumnName("snapshot_id");
-
         builder.Property(x => x.FromCurrency)
                .HasConversion(ExpenseTracker.Infrastructure.Persistence.Converters.DomainConverters.CurrencyCodeConverter)
                .HasColumnName("from_currency")

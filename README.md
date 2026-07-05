@@ -9,15 +9,14 @@ See [`docs/requirements/README.md`](./docs/requirements/README.md) for the full 
 ### Prerequisites
 - .NET 10 SDK
 - Node 22+ (with npm) for the client
-- Podman (for local Postgres + Papercut SMTP)
+- Docker (for local Postgres + Mailpit SMTP)
 
-### Infrastructure (one-time per host boot on macOS)
+### Infrastructure (one-time boot)
 ```bash
-podman machine start
-podman compose up -d           # postgres on :5432, Papercut SMTP UI on :8081
+docker compose up -d           # postgres on :5432, Mailpit SMTP UI on :8025
 ```
 - Postgres connection string: `Host=localhost;Port=5432;Database=expensetracker;Username=et;Password=et`
-- Papercut web UI (view captured mail): <http://localhost:8081>
+- Mailpit web UI (view captured mail): <http://localhost:8025>
 
 ### Backend (.NET 10)
 ```bash
@@ -39,10 +38,11 @@ npm --prefix client run dev
 
 ### Tests
 ```bash
+npm --prefix client run test:e2e           # Playwright smoke test
 dotnet test                                # Runs both domain invariants and integration tests against Testcontainers
 npm --prefix client run build              # client typecheck + build
 ```
-Note: Ensure Docker/Podman is running before executing integration tests, as Testcontainers will spin up a transient Postgres instance.
+Note: Ensure Docker is running before executing integration tests, as Testcontainers will spin up a transient Postgres instance.
 
 ### Secrets
 All secrets required for local development are defaulted in `appsettings.Development.json`. You do not need to set any environment variables or user secrets for local runs.
@@ -68,4 +68,4 @@ dotnet ef migrations add <Name> \
 ```
 
 ## Status
-Slice 2 (Persistence + Domain foundation) complete: strongly-typed IDs, Money/FXRate value objects, User/Tenant/TenantMembership aggregates, EF Core DbContext with Postgres configurations, Initial migration, advisory-locked `MigrationsHostedService`, 22 passing domain tests. Next slice: auth (magic link + passkeys) — see [`docs/requirements/02-authentication.md`](./docs/requirements/02-authentication.md).
+Phase 1 MVP is fully complete. The full-stack app features switchable tenant workspaces, magic link & passkey auth, account management, multi-currency transactions, recurring rules, category trees, CSV import wizards, and an Apple-like premium UI with full PWA support. The Playwright E2E smoke tests successfully verify the < 180s onboarding flow.

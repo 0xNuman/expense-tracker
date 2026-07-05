@@ -27,9 +27,9 @@ public static class AccountEndpoints
              .WithName("GetAccount")
              .WithSummary("Get a single account by id.");
 
-        group.MapPatch("/{id}", RenameAccount)
-             .WithName("RenameAccount")
-             .WithSummary("Rename an existing account.");
+        group.MapPatch("/{id}", UpdateAccount)
+             .WithName("UpdateAccount")
+             .WithSummary("Update an existing account.");
 
         group.MapPost("/{id}/archive", ArchiveAccount)
              .WithName("ArchiveAccount")
@@ -126,9 +126,9 @@ public static class AccountEndpoints
     }
 
     // ── PATCH /api/accounts/{id} ──────────────────────────────────
-    private static async Task<IResult> RenameAccount(
+    private static async Task<IResult> UpdateAccount(
         Guid id,
-        RenameAccountRequest request,
+        UpdateAccountRequest request,
         ExpenseTrackerDbContext db,
         CancellationToken ct)
     {
@@ -137,9 +137,13 @@ public static class AccountEndpoints
         if (account is null)
             return Results.Problem("Account not found.", statusCode: StatusCodes.Status404NotFound);
 
+        AccountType type;
+        try { type = Enum.Parse<AccountType>(request.Type, ignoreCase: true); }
+        catch (ArgumentException) { return Results.Problem("Invalid account type.", statusCode: StatusCodes.Status400BadRequest); }
+
         try
         {
-            account.Rename(request.Name);
+            account.Update(request.Name, type);
         }
         catch (ArgumentException ex)
         {
@@ -224,11 +228,11 @@ public static class AccountEndpoints
         return new HalDocument()
             .WithLink("self", Link.Get($"/api/accounts/{account.Id}"))
             .WithLink("et:transactions", Link.Get($"/api/accounts/{account.Id}/transactions"))
-            .WithLink("et:rename-account", new Link
+            .WithLink("et:update-account", new Link
             {
                 Href = $"/api/accounts/{account.Id}",
                 Method = "PATCH",
-                Title = "Rename this account"
+                Title = "Update this account"
             })
             .WithState("id", account.Id.ToString())
             .WithState("name", account.Name)

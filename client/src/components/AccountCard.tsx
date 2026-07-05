@@ -1,6 +1,5 @@
 import type { Account } from '../hal/api';
-import { Banknote, Landmark, Vault, CreditCard, Wallet, MoreHorizontal } from 'lucide-react';
-import { ReactNode } from 'react';
+import { Banknote, Landmark, Vault, CreditCard, Wallet } from 'lucide-react';
 
 const TypeIcon = ({ type }: { type: string }) => {
   switch (type) {
@@ -19,7 +18,7 @@ const TypeIcon = ({ type }: { type: string }) => {
   }
 };
 
-export function AccountCard({ account, onRenameRequested, onArchiveRequested }: { account: Account; onRenameRequested?: (account: Account) => void; onArchiveRequested?: (account: Account) => void }) {
+export function AccountCard({ account, onEditRequested, onArchiveRequested }: { account: Account; onEditRequested?: (account: Account) => void; onArchiveRequested?: (account: Account) => void }) {
   return (
     <div className="group relative flex flex-col justify-between rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg dark:border-slate-800/60 dark:bg-slate-900/80">
       <div className="flex items-start justify-between">
@@ -44,13 +43,13 @@ export function AccountCard({ account, onRenameRequested, onArchiveRequested }: 
       
       {/* Hover Actions */}
       <div className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center gap-1 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-lg p-1 shadow-sm border border-slate-100 dark:border-slate-800">
-        {onRenameRequested && (
+        {onEditRequested && (
           <button
             type="button"
             className="rounded-md px-2.5 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100"
-            onClick={(e) => { e.preventDefault(); onRenameRequested(account); }}
+            onClick={(e) => { e.preventDefault(); onEditRequested(account); }}
           >
-            Rename
+            Edit
           </button>
         )}
         {!account.isArchived && onArchiveRequested && (

@@ -18,7 +18,7 @@ public static class PersistenceSetup
             options.UseNpgsql(connectionString, npgsql =>
             {
                 npgsql.MigrationsAssembly(typeof(ExpenseTracker.Infrastructure.Persistence.ExpenseTrackerDbContext).Assembly.FullName);
-            });
+            }).UseSnakeCaseNamingConvention();
             if (System.Diagnostics.Debugger.IsAttached)
             {
                 options.EnableSensitiveDataLogging();

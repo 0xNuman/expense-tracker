@@ -10,7 +10,6 @@ public sealed class AccountConfiguration : IEntityTypeConfiguration<Account>
 {
     public void Configure(EntityTypeBuilder<Account> b)
     {
-        b.ToTable("accounts");
         b.HasKey(a => a.Id);
 
         b.Property(a => a.Id)
@@ -37,7 +36,6 @@ public sealed class AccountConfiguration : IEntityTypeConfiguration<Account>
             .HasColumnType("numeric(18,4)")
             .IsRequired();
         b.Property(a => a.OpenedAtUtc).HasColumnName("opened_at_utc").IsRequired();
-        b.Property(a => a.ClosedAtUtc).HasColumnName("closed_at_utc");
         b.Property(a => a.IsArchived).HasColumnName("is_archived").IsRequired();
 
         b.Ignore(a => a.Events);

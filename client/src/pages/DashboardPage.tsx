@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { fetchAccounts, fetchTransactions, renameAccount, voidTransaction, archiveAccount } from '../hal/api';
+import { fetchAccounts, fetchTransactions, voidTransaction, archiveAccount } from '../hal/api';
 import type { Account, Transaction } from '../hal/api';
 import { useAuth } from '../auth/AuthContext';
 import { Layout } from '../components/Layout';
@@ -21,6 +21,7 @@ export function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [modal, setModal] = useState<Modal>('none');
   const [transactionToEdit, setTransactionToEdit] = useState<Transaction | undefined>(undefined);
+  const [accountToEdit, setAccountToEdit] = useState<Account | undefined>(undefined);
 
   const load = async () => {
     if (!accessToken) return;
@@ -40,16 +41,9 @@ export function DashboardPage() {
     }
   };
 
-  const handleRenameAccount = async (account: Account) => {
-    if (!accessToken) return;
-    const newName = window.prompt(`Rename account '${account.name}' to:`, account.name);
-    if (!newName || newName === account.name) return;
-    try {
-      await renameAccount(accessToken, account.id, newName);
-      void load();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not rename account');
-    }
+  const handleEditAccount = (account: Account) => {
+    setAccountToEdit(account);
+    setModal('account');
   };
 
   const handleVoidTransaction = async (t: Transaction) => {
@@ -99,7 +93,10 @@ export function DashboardPage() {
             <h2 className="text-lg font-semibold">Accounts</h2>
             <button
               type="button"
-              onClick={() => setModal('account')}
+              onClick={() => {
+                setAccountToEdit(undefined);
+                setModal('account');
+              }}
               className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
             >
               + Add
@@ -116,7 +113,7 @@ export function DashboardPage() {
           ) : (
             <div className="flex flex-col gap-3">
               {accounts.map((a) => (
-                <AccountCard key={a.id} account={a} onRenameRequested={handleRenameAccount} onArchiveRequested={handleArchiveAccount} />
+                <AccountCard key={a.id} account={a} onEditRequested={handleEditAccount} onArchiveRequested={handleArchiveAccount} />
               ))}
             </div>
           )}
@@ -181,7 +178,7 @@ export function DashboardPage() {
           >
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-base font-semibold">
-                {modal === 'account' ? 'Add account' : modal === 'transfer' ? 'Transfer' : transactionToEdit ? 'Edit transaction' : 'Add transaction'}
+                {modal === 'account' ? (accountToEdit ? 'Edit account' : 'Add account') : modal === 'transfer' ? 'Transfer' : transactionToEdit ? 'Edit transaction' : 'Add transaction'}
               </h3>
               <button type="button" onClick={() => setModal('none')} className="text-slate-400 hover:text-slate-600">
                 ×
@@ -190,11 +187,16 @@ export function DashboardPage() {
             {modal === 'account' ? (
               <AddAccountForm
                 token={accessToken ?? ''}
+                initialData={accountToEdit}
                 onCreated={() => {
                   setModal('none');
+                  setAccountToEdit(undefined);
                   void load();
                 }}
-                onCancel={() => setModal('none')}
+                onCancel={() => {
+                  setModal('none');
+                  setAccountToEdit(undefined);
+                }}
               />
             ) : modal === 'transfer' ? (
               <TransferForm

@@ -8,11 +8,7 @@ public class CachedRateConfiguration : IEntityTypeConfiguration<CachedRate>
 {
     public void Configure(EntityTypeBuilder<CachedRate> builder)
     {
-        builder.ToTable("cached_rates");
-
         builder.HasKey(x => x.Id);
-        builder.Property(x => x.Id).HasColumnName("id");
-
         builder.Property(x => x.FromCurrency)
             .HasConversion(ExpenseTracker.Infrastructure.Persistence.Converters.DomainConverters.CurrencyCodeConverter)
             .HasColumnName("from_currency")

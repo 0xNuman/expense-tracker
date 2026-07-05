@@ -9,7 +9,7 @@ Expense Tracker — .NET 10 Minimal API (PostgreSQL + EF Core, Vertical Slice) +
 - `src/ExpenseTracker.Infrastructure/` — EF Core DbContext, configurations, value converters, migrations.
 - `tests/ExpenseTracker.Domain.Tests/` — xUnit + FluentAssertions domain invariant tests.
 - `client/` — React + Vite + TS + Tailwind (PWA, mobile-first). HAL consumer in `client/src/hal/`.
-- `docker-compose.yml` — Postgres 17 + Papercut SMTP (podman-compatible).
+- `docker-compose.yml` — Postgres 17 + Mailpit SMTP.
 - `docs/requirements/` — canonical requirements docs + phase plans.
 
 ## Build & run
@@ -20,14 +20,13 @@ Expense Tracker — .NET 10 Minimal API (PostgreSQL + EF Core, Vertical Slice) +
 - Frontend lint: `npm --prefix client run lint` (oxlint).
 - Domain tests: `dotnet test`.
 
-## Infrastructure (Postgres + Papercut via podman)
+## Infrastructure (Postgres + Mailpit via Docker)
 ```bash
-podman machine start         # one-time per host boot (macOS)
-podman compose up -d        # starts postgres on :5432 and Papercut on :8081
-podman compose down          # stop
+docker compose up -d        # starts postgres on :5432 and Mailpit on :8025
+docker compose down          # stop
 ```
 Connection string: `Host=localhost;Port=5432;Database=expensetracker;Username=et;Password=et`
-Papercut web UI: <http://localhost:8081>
+Mailpit web UI: <http://localhost:8025>
 
 ## Migrations
 - Auto-applied on app startup via `MigrationsHostedService` (advisory-locked). Disable via `Persistence:ApplyMigrationsOnStartup=false`.
@@ -58,14 +57,17 @@ See `docs/requirements/00-overview.md` for the full table. Key recent entries:
 - #14 — Tenant route id = GUID only (no slug for MVP); slug additive later if needed.
 
 ## Current status
-Persistence + Domain foundation complete: strongly-typed IDs, Money/FXRate value objects, User/Tenant/TenantMembership aggregates, EF Core DbContext with Postgres configs, Initial migration, advisory-locked `MigrationsHostedService`, 22 passing domain tests. Next slice: auth (magic link + passkeys) — see `docs/requirements/02-authentication.md`. (Blocked on local Podman machine startup issue; verify with `podman machine start` before booting API.)
+**Phase 1 MVP Complete!** 
+The full-stack app features switchable tenant workspaces, magic link & passkey auth, account management, multi-currency transactions, recurring rules, category trees, CSV import wizards, and an Apple-like premium UI with full PWA support. The Playwright E2E smoke tests successfully verify the < 180s onboarding flow.
+
+Ready to begin **Phase 2 (Budgets)** or expand the `IntegrationTests` suite.
 
 ## Auth wiring (magic link)
 - JWT access tokens signed with ECDSA P-256 via `JwtAccessTokenService` (singleton). Ephemeral key in dev; PEM key from config in prod.
 - Refresh tokens stored hashed in `refresh_tokens` table, rotating on each refresh, family-based reuse detection.
 - Magic-link tokens stored hashed in `magic_link_tokens` table, 15-min TTL, single-use.
-- `AuthSetup.AddExpenseTrackerAuth()` wires: `IAccessTokenService` (eager singleton), `IEmailSender` (SmtpEmailSender to Papercut), `ICurrentUserService` (scoped, reads JWT claims), `ITenantContext` (scoped, derives tenant from JWT claim), JWT bearer auth, authorization.
+- `AuthSetup.AddExpenseTrackerAuth()` wires: `IAccessTokenService` (eager singleton), `IEmailSender` (SmtpEmailSender to Mailpit), `ICurrentUserService` (scoped, reads JWT claims), `ITenantContext` (scoped, derives tenant from JWT claim), JWT bearer auth, authorization.
 - Cookie helpers: `response.SetRefreshCookie(rawToken, expiresAt)`, `request.GetRefreshCookie()`, `response.ClearRefreshCookie()`. Cookie path `/api/auth`, HttpOnly, Secure, SameSite=Lax.
 - Endpoints under `Features/Auth/AuthEndpoints.cs`: `POST /api/auth/magic-link`, `POST /api/auth/magic-link/verify`, `POST /api/auth/refresh`, `POST /api/auth/switch-tenant`.
-- Dev: magic-link URL is logged when email sending fails (so tests can extract the token without Papercut running).
-- Passkeys: not yet implemented; deferred to next iteration.
+- Dev: magic-link URL is logged when email sending fails (so tests can extract the token without Mailpit running).
+- Passkeys: fully implemented (WebAuthn / simplewebauthn).

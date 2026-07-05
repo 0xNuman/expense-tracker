@@ -15,8 +15,11 @@ public sealed class CreateAccountRequest
     public decimal OpeningBalance { get; set; }
 }
 
-public sealed class RenameAccountRequest
+public sealed class UpdateAccountRequest
 {
     [System.ComponentModel.DataAnnotations.Required]
     public string Name { get; set; } = string.Empty;
+
+    [System.ComponentModel.DataAnnotations.Required]
+    public string Type { get; set; } = string.Empty;
 }

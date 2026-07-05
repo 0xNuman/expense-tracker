@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Account } from '../hal/api';
-import { createAccount } from '../hal/api';
+import { createAccount, updateAccount } from '../hal/api';
 import { ErrorBanner } from './ErrorBanner';
 import { Spinner } from './Spinner';
 
@@ -10,15 +10,21 @@ export function AddAccountForm({
   token,
   onCreated,
   onCancel,
+  initialData,
 }: {
   token: string;
   onCreated?: (account: Account) => void;
   onCancel?: () => void;
+  initialData?: Account;
 }) {
-  const [name, setName] = useState('');
-  const [type, setType] = useState<(typeof ACCOUNT_TYPES)[number]>('Checking');
-  const [currency, setCurrency] = useState('USD');
-  const [openingBalance, setOpeningBalance] = useState('0');
+  const [name, setName] = useState(initialData?.name ?? '');
+  const [type, setType] = useState<(typeof ACCOUNT_TYPES)[number]>(
+    (initialData?.type as any) ?? 'Checking'
+  );
+  const [currency, setCurrency] = useState(initialData?.currency ?? 'USD');
+  const [openingBalance, setOpeningBalance] = useState(
+    initialData?.openingBalance?.toString() ?? '0'
+  );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,17 +34,22 @@ export function AddAccountForm({
     setError(null);
     setSubmitting(true);
     try {
-      const account = await createAccount(token, {
-        name: name.trim(),
-        type,
-        currency: currency.trim().toUpperCase(),
-        openingBalance: Number(openingBalance) || 0,
-      });
+      let account;
+      if (initialData) {
+        account = await updateAccount(token, initialData.id, name.trim(), type);
+      } else {
+        account = await createAccount(token, {
+          name: name.trim(),
+          type,
+          currency: currency.trim().toUpperCase(),
+          openingBalance: Number(openingBalance) || 0,
+        });
+      }
       onCreated?.(account);
       setName('');
       setOpeningBalance('0');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not create account');
+      setError(err instanceof Error ? err.message : initialData ? 'Could not update account' : 'Could not create account');
     } finally {
       setSubmitting(false);
     }
@@ -66,31 +77,35 @@ export function AddAccountForm({
           ))}
         </select>
       </Field>
-      <Field label="Currency">
-        <select
-          required
-          value={currency}
-          onChange={(e) => setCurrency(e.target.value)}
-          className="input"
-        >
-          <option value="USD">USD - US Dollar</option>
-          <option value="EUR">EUR - Euro</option>
-          <option value="GBP">GBP - British Pound</option>
-          <option value="JPY">JPY - Japanese Yen</option>
-          <option value="INR">INR - Indian Rupee</option>
-          <option value="CAD">CAD - Canadian Dollar</option>
-          <option value="AUD">AUD - Australian Dollar</option>
-        </select>
-      </Field>
-      <Field label="Opening balance">
-        <input
-          type="number"
-          step="0.01"
-          value={openingBalance}
-          onChange={(e) => setOpeningBalance(e.target.value)}
-          className="input"
-        />
-      </Field>
+      {!initialData && (
+        <>
+          <Field label="Currency">
+            <select
+              required
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value)}
+              className="input"
+            >
+              <option value="USD">USD - US Dollar</option>
+              <option value="EUR">EUR - Euro</option>
+              <option value="GBP">GBP - British Pound</option>
+              <option value="JPY">JPY - Japanese Yen</option>
+              <option value="INR">INR - Indian Rupee</option>
+              <option value="CAD">CAD - Canadian Dollar</option>
+              <option value="AUD">AUD - Australian Dollar</option>
+            </select>
+          </Field>
+          <Field label="Opening balance">
+            <input
+              type="number"
+              step="0.01"
+              value={openingBalance}
+              onChange={(e) => setOpeningBalance(e.target.value)}
+              className="input"
+            />
+          </Field>
+        </>
+      )}
       <div className="flex items-center gap-2">
         <button
           type="submit"
@@ -98,7 +113,7 @@ export function AddAccountForm({
           className="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-white font-medium hover:bg-sky-700 disabled:opacity-60"
         >
           {submitting && <Spinner />}
-          Save account
+          {initialData ? 'Update account' : 'Save account'}
         </button>
         {onCancel && (
           <button type="button" onClick={onCancel} className="rounded-lg px-3 py-2 text-sm text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">

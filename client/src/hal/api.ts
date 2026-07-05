@@ -291,9 +291,9 @@ export async function completePasskeyRegistration(
   }
 }
 
-export async function renameAccount(token: string, id: string, name: string): Promise<Account> {
+export async function updateAccount(token: string, id: string, name: string, type: string): Promise<Account> {
   const href = `/api/accounts/${encodeURIComponent(id)}`;
-  const doc = await halFetch<HalDocument>(href, { method: 'PATCH', body: JSON.stringify({ name }) }, token);
+  const doc = await halFetch<HalDocument>(href, { method: 'PATCH', body: JSON.stringify({ name, type }) }, token);
   return toAccount(doc);
 }
 

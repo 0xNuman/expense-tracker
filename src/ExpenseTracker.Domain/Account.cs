@@ -48,10 +48,11 @@ public sealed class Account : AggregateRoot
         return account;
     }
 
-    public void Rename(string name)
+    public void Update(string name, AccountType type)
     {
         ValidateName(name);
         Name = name.Trim();
+        Type = type;
     }
 
     public void Archive() => IsArchived = true;

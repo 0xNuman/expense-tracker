@@ -10,7 +10,6 @@ public sealed class TransactionConfiguration : IEntityTypeConfiguration<Transact
 {
     public void Configure(EntityTypeBuilder<Transaction> b)
     {
-        b.ToTable("transactions");
         b.HasKey(t => t.Id);
 
         b.Property(t => t.Id)
@@ -50,8 +49,6 @@ public sealed class TransactionConfiguration : IEntityTypeConfiguration<Transact
             .IsRequired();
 
         b.Property(t => t.IsVoided).HasColumnName("is_voided").IsRequired();
-        b.Property(t => t.VoidedAtUtc).HasColumnName("voided_at_utc");
-
         b.Ignore(t => t.Events);
 
         b.Property(t => t.ImportBatchId)

@@ -1,4 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, Settings } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useAuth } from '../auth/AuthContext';
 
@@ -68,9 +69,10 @@ export function Layout({ children }: { children: ReactNode }) {
                 end
                 viewTransition
                 className={({ isActive }) =>
-                  `${navItem} ${isActive ? 'bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'}`
+                  `${navItem} flex items-center gap-2 ${isActive ? 'bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'}`
                 }
               >
+                <LayoutDashboard className="h-4 w-4" />
                 Dashboard
               </NavLink>
             </li>
@@ -79,9 +81,10 @@ export function Layout({ children }: { children: ReactNode }) {
                 to="/settings"
                 viewTransition
                 className={({ isActive }) =>
-                  `${navItem} ${isActive ? 'bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'}`
+                  `${navItem} flex items-center gap-2 ${isActive ? 'bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'}`
                 }
               >
+                <Settings className="h-4 w-4" />
                 Settings
               </NavLink>
             </li>
@@ -103,6 +106,7 @@ export function Layout({ children }: { children: ReactNode }) {
                 `flex flex-col items-center py-2 text-xs ${isActive ? 'text-sky-600 dark:text-sky-400' : 'text-slate-500 dark:text-slate-400'}`
               }
             >
+              <LayoutDashboard className="mb-1 h-5 w-5" />
               Dashboard
             </NavLink>
           </li>
@@ -114,6 +118,7 @@ export function Layout({ children }: { children: ReactNode }) {
                 `flex flex-col items-center py-2 text-xs ${isActive ? 'text-sky-600 dark:text-sky-400' : 'text-slate-500 dark:text-slate-400'}`
               }
             >
+              <Settings className="mb-1 h-5 w-5" />
               Settings
             </NavLink>
           </li>

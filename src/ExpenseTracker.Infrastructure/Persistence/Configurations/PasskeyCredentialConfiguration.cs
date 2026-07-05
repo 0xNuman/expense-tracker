@@ -10,7 +10,6 @@ public sealed class PasskeyCredentialConfiguration : IEntityTypeConfiguration<Pa
 {
     public void Configure(EntityTypeBuilder<PasskeyCredential> b)
     {
-        b.ToTable("passkey_credentials");
         b.HasKey(c => c.Id);
 
         b.Property(c => c.Id)
@@ -27,8 +26,6 @@ public sealed class PasskeyCredentialConfiguration : IEntityTypeConfiguration<Pa
         b.Property(c => c.SignCount).HasColumnName("sign_count").IsRequired();
         b.Property(c => c.DeviceLabel).HasColumnName("device_label").HasMaxLength(120).IsRequired();
         b.Property(c => c.CreatedAtUtc).HasColumnName("created_at_utc").IsRequired();
-        b.Property(c => c.LastUsedAtUtc).HasColumnName("last_used_at_utc");
-
         b.HasIndex(c => c.CredentialIdBase64Url).IsUnique();
         b.HasIndex(c => c.UserId);
     }

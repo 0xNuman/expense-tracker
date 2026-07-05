@@ -10,7 +10,6 @@ public sealed class MagicLinkTokenConfiguration : IEntityTypeConfiguration<Magic
 {
     public void Configure(EntityTypeBuilder<MagicLinkToken> b)
     {
-        b.ToTable("magic_link_tokens");
         b.HasKey(t => t.Id);
 
         b.Property(t => t.Id)
@@ -22,7 +21,6 @@ public sealed class MagicLinkTokenConfiguration : IEntityTypeConfiguration<Magic
         b.Property(t => t.TokenHash).HasColumnName("token_hash").HasMaxLength(88).IsRequired();
         b.Property(t => t.IssuedAtUtc).HasColumnName("issued_at_utc").IsRequired();
         b.Property(t => t.ExpiresAtUtc).HasColumnName("expires_at_utc").IsRequired();
-        b.Property(t => t.ConsumedAtUtc).HasColumnName("consumed_at_utc");
         b.Property(t => t.IssuedFromIp).HasColumnName("issued_from_ip").HasMaxLength(64);
 
         b.Property(t => t.UserId)

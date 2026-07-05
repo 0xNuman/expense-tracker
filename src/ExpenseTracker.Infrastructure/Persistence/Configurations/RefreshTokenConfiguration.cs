@@ -10,7 +10,6 @@ public sealed class RefreshTokenConfiguration : IEntityTypeConfiguration<Refresh
 {
     public void Configure(EntityTypeBuilder<RefreshToken> b)
     {
-        b.ToTable("refresh_tokens");
         b.HasKey(t => t.Id);
 
         b.Property(t => t.Id)
@@ -26,7 +25,6 @@ public sealed class RefreshTokenConfiguration : IEntityTypeConfiguration<Refresh
         b.Property(t => t.FamilyId).HasColumnName("family_id").IsRequired();
         b.Property(t => t.IssuedAtUtc).HasColumnName("issued_at_utc").IsRequired();
         b.Property(t => t.ExpiresAtUtc).HasColumnName("expires_at_utc").IsRequired();
-        b.Property(t => t.RevokedAtUtc).HasColumnName("revoked_at_utc");
         b.Property(t => t.ReplacedById)
             .HasConversion(DomainConverters.NullableRefreshTokenIdConverter)
             .HasColumnName("replaced_by_id");

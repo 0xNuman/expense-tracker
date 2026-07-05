@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../auth/AuthContext';
 import { FolderTree, Plus, Edit2, Archive, RefreshCw, ChevronRight, ChevronDown, CheckCircle } from 'lucide-react';
+import { IconPicker, CategoryIconRenderer } from '../../components/IconPicker';
 
 // API Client Types
 export interface Category {
@@ -70,7 +71,7 @@ export const CategoriesTree: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
     const [editingId, setEditingId] = useState<string | null>(null);
-    const [formData, setFormData] = useState({ name: '', kind: 'Expense', parentId: '' });
+    const [formData, setFormData] = useState({ name: '', kind: 'Expense', parentId: '', icon: '' });
     
     // UI states
     const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>({});
@@ -87,14 +88,14 @@ export const CategoriesTree: React.FC = () => {
 
     const openCreateModal = (parentId?: string) => {
         setModalMode('create');
-        setFormData({ name: '', kind: 'Expense', parentId: parentId || '' });
+        setFormData({ name: '', kind: 'Expense', parentId: parentId || '', icon: '' });
         setIsModalOpen(true);
     };
 
     const openEditModal = (cat: Category) => {
         setModalMode('edit');
         setEditingId(cat.id);
-        setFormData({ name: cat.name, kind: cat.kind, parentId: cat.parentId || '' });
+        setFormData({ name: cat.name, kind: cat.kind, parentId: cat.parentId || '', icon: cat.icon || '' });
         setIsModalOpen(true);
     };
 
@@ -106,7 +107,8 @@ export const CategoriesTree: React.FC = () => {
             const payload = { 
                 name: formData.name, 
                 kind: formData.kind, 
-                parentId: formData.parentId || null 
+                parentId: formData.parentId || null,
+                icon: formData.icon || null
             };
 
             if (modalMode === 'create') {
@@ -169,7 +171,7 @@ export const CategoriesTree: React.FC = () => {
                             )}
                             
                             <div className={`p-2 rounded-lg ${c.kind === 'Income' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30' : c.kind === 'Expense' ? 'bg-rose-100 text-rose-600 dark:bg-rose-900/30' : 'bg-blue-100 text-blue-600 dark:bg-blue-900/30'}`}>
-                                <FolderTree size={20} />
+                                <CategoryIconRenderer iconName={c.icon} className="w-5 h-5" />
                             </div>
                             
                             <div className="flex flex-col">
@@ -299,6 +301,11 @@ export const CategoriesTree: React.FC = () => {
                                         </select>
                                     </div>
                                 )}
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Icon</label>
+                                    <IconPicker value={formData.icon} onChange={(i) => setFormData({ ...formData, icon: i })} />
+                                </div>
                             </div>
 
                             <div className="mt-8 flex items-center justify-end gap-3">
