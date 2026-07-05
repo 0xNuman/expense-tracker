@@ -25,6 +25,9 @@ public class ExpenseTrackerDbContext : DbContext
     public DbSet<TenantMembership> TenantMemberships => Set<TenantMembership>();
     public DbSet<MagicLinkToken> MagicLinkTokens => Set<MagicLinkToken>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<PasskeyCredential> PasskeyCredentials => Set<PasskeyCredential>();
+    public DbSet<Account> Accounts => Set<Account>();
+    public DbSet<Transaction> Transactions => Set<Transaction>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -34,5 +37,11 @@ public class ExpenseTrackerDbContext : DbContext
         // that expose a TenantId property get filtered by the active tenant.
         modelBuilder.Entity<TenantMembership>()
             .HasQueryFilter(m => m.TenantId == _tenantContext.ActiveTenantId);
+
+        modelBuilder.Entity<Account>()
+            .HasQueryFilter(a => a.TenantId == _tenantContext.ActiveTenantId);
+
+        modelBuilder.Entity<Transaction>()
+            .HasQueryFilter(t => t.TenantId == _tenantContext.ActiveTenantId);
     }
 }

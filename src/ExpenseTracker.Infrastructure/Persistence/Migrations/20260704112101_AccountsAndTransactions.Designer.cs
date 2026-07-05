@@ -3,6 +3,7 @@ using System;
 using ExpenseTracker.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ExpenseTracker.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ExpenseTrackerDbContext))]
-    partial class ExpenseTrackerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260704112101_AccountsAndTransactions")]
+    partial class AccountsAndTransactions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -129,55 +132,6 @@ namespace ExpenseTracker.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("magic_link_tokens", (string)null);
-                });
-
-            modelBuilder.Entity("ExpenseTracker.Domain.PasskeyCredential", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at_utc");
-
-                    b.Property<string>("CredentialIdBase64Url")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)")
-                        .HasColumnName("credential_id");
-
-                    b.Property<string>("DeviceLabel")
-                        .IsRequired()
-                        .HasMaxLength(120)
-                        .HasColumnType("character varying(120)")
-                        .HasColumnName("device_label");
-
-                    b.Property<DateTimeOffset?>("LastUsedAtUtc")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_used_at_utc");
-
-                    b.Property<byte[]>("PublicKey")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("public_key");
-
-                    b.Property<long>("SignCount")
-                        .HasColumnType("bigint")
-                        .HasColumnName("sign_count");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CredentialIdBase64Url")
-                        .IsUnique();
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("passkey_credentials", (string)null);
                 });
 
             modelBuilder.Entity("ExpenseTracker.Domain.RefreshToken", b =>

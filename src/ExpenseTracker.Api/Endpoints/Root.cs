@@ -41,8 +41,17 @@ public static class Root
                 Method = "POST",
                 Title = "Switch the active tenant (requires authentication)"
             })
+            .WithLink("et:passkey-begin-auth", new Link
+            {
+                Href = "/api/auth/passkeys/begin-auth",
+                Method = "POST",
+                Title = "Begin WebAuthn (passkey) sign-in"
+            })
             .WithLink("et:tenants", Link.Get("/api/tenants?filter=mine", "Tenants the caller belongs to (Phase 1)"))
             .WithLink("et:create-tenant", Link.Post("/api/tenants", "Create a new tenant workspace (Phase 1)"))
+            .WithLink("et:accounts", Link.Get("/api/accounts", "List accounts in the active tenant"))
+            .WithLink("et:create-account", Link.Post("/api/accounts", "Create a new account in the active tenant"))
+            .WithLink("et:transactions", Link.Get("/api/transactions", "List all transactions in the active tenant"))
             .WithState("name", "Expense Tracker API")
             .WithState("version", "0.1.0")
             .WithState("phase", "auth");

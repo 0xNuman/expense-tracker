@@ -10,3 +10,31 @@ body,
   height: 100%;
   margin: 0;
 }
+
+.input {
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid var(--input-border, rgb(203 213 225));
+  background: white;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: rgb(15 23 42);
+  outline: none;
+}
+
+.input:focus {
+  border-color: rgb(2 132 199);
+  box-shadow: 0 0 0 2px rgb(186 230 253);
+}
+
+@media (prefers-color-scheme: dark) {
+  .input {
+    background: rgb(15 23 42);
+    border-color: rgb(51 65 85);
+    color: rgb(241 245 249);
+  }
+  .input:focus {
+    border-color: rgb(56 189 248);
+    box-shadow: 0 0 0 2px rgb(12 74 110);
+  }
+}

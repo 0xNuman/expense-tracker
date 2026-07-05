@@ -1,4 +1,6 @@
+using ExpenseTracker.Api.Features.Accounts;
 using ExpenseTracker.Api.Features.Auth;
+using ExpenseTracker.Api.Features.Transactions;
 using ExpenseTracker.Api.Hal;
 using ExpenseTracker.Api.Health;
 using ExpenseTracker.Api.Persistence;
@@ -56,6 +58,8 @@ public static class Program
            .WithTags("Health");
 
         app.MapAuth();
+        app.MapAccounts();
+        app.MapTransactions();
 
         app.Run();
     }

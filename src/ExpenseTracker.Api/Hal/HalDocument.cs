@@ -11,7 +11,7 @@ public sealed class HalDocument
 {
     private readonly Dictionary<string, object> _links = new(StringComparer.Ordinal);
     private readonly Dictionary<string, object> _embedded = new(StringComparer.Ordinal);
-    private readonly Dictionary<string, object> _state = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, object?> _state = new(StringComparer.Ordinal);
 
     public const string MediaType = "application/hal+json";
 
@@ -51,7 +51,7 @@ public sealed class HalDocument
     }
 
     /// <summary>Adds a state property. Keys beginning with <c>_</c> are reserved.</summary>
-    public HalDocument WithState(string key, object value)
+    public HalDocument WithState(string key, object? value)
     {
         if (key.StartsWith('_'))
         {

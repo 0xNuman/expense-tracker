@@ -29,9 +29,22 @@ const HAL_MEDIA = 'application/hal+json';
  */
 export class HalClient {
   private readonly baseUrl: string;
+  private readonly getAuthToken?: () => string | null;
+  private readonly onUnauthorized?: () => void | Promise<void>;
 
-  constructor(baseUrl = '/api') {
+  /**
+   * @param baseUrl Root HAL endpoint, default `/api`.
+   * @param opts.getAuthToken Returns the current in-memory access token (or null).
+   * @param opts.onUnauthorized Invoked when a request returns 401 (after exhausting
+   *   refresh attempts). Typically clears auth state and redirects to /login.
+   */
+  constructor(
+    baseUrl = '/api',
+    opts?: { getAuthToken?: () => string | null; onUnauthorized?: () => void | Promise<void> },
+  ) {
     this.baseUrl = baseUrl;
+    this.getAuthToken = opts?.getAuthToken;
+    this.onUnauthorized = opts?.onUnauthorized;
   }
 
   /** Fetch the root document for `/api`. */
@@ -74,16 +87,26 @@ export class HalClient {
     return Array.isArray(value) ? value[0] : value;
   }
 
+  private authHeaders(): Record<string, string> {
+    const token = this.getAuthToken?.() ?? null;
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
   private async get<T>(url: string, signal?: AbortSignal | null, init?: RequestInit): Promise<T> {
+    const headers: Record<string, string> = { Accept: HAL_MEDIA, ...this.authHeaders(), ...(init?.headers as Record<string, string> | undefined) };
     const res = await fetch(url, {
-      headers: { Accept: HAL_MEDIA },
-      ...(signal ? { signal } : {}),
       ...init,
+      headers,
+      ...(signal ? { signal } : {}),
     });
+    if (res.status === 401 && this.onUnauthorized) {
+      await this.onUnauthorized();
+    }
     if (!res.ok) {
       const body = await res.text().catch(() => '');
       throw new HalError(res.status, res.statusText, body, url);
     }
+    if (res.status === 204) return undefined as T;
     return (await res.json()) as T;
   }
 }
@@ -105,5 +128,21 @@ export class HalError extends Error {
   }
 }
 
-/** Singleton client for the app. */
+/** Singleton client for the app. Auth wiring is attached at runtime via {@link configureHalClient}. */
 export const halClient = new HalClient();
+
+let isConfigured = false;
+
+/**
+ * Attach auth-aware behavior to the singleton HalClient. Safe to call multiple
+ * times; subsequent calls are no-ops (the singleton keeps the first wiring).
+ */
+export function configureHalClient(opts: {
+  getAuthToken: () => string | null;
+  onUnauthorized: () => void | Promise<void>;
+}): void {
+  if (isConfigured) return;
+  (halClient as unknown as { getAuthToken: () => string | null }).getAuthToken = opts.getAuthToken;
+  (halClient as unknown as { onUnauthorized: () => void | Promise<void> }).onUnauthorized = opts.onUnauthorized;
+  isConfigured = true;
+}

@@ -3,6 +3,7 @@ using ExpenseTracker.Domain;
 using ExpenseTracker.Infrastructure.Auth;
 using ExpenseTracker.Infrastructure.Email;
 using ExpenseTracker.Infrastructure.Persistence;
+using Fido2NetLib;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
@@ -24,6 +25,16 @@ public static class AuthSetup
         services.AddScoped<ITenantContext, RequestTenantContext>();
 
         services.AddSingleton<IEmailSender, SmtpEmailSender>();
+        services.AddSingleton<AuthRateLimiter>();
+        services.AddMemoryCache();
+
+        // Fido2 (WebAuthn) relying party — singleton; configuration is immutable.
+        services.Configure<Fido2Options>(configuration.GetSection(Fido2Options.SectionName));
+        services.AddSingleton<IFido2>(sp =>
+        {
+            var opts = sp.GetRequiredService<IOptions<Fido2Options>>().Value;
+            return Fido2Setup.Create(opts);
+        });
 
         // Create the token service eagerly so we can wire its validation parameters
         // into JwtBearer without a BuildServiceProvider() anti-pattern.

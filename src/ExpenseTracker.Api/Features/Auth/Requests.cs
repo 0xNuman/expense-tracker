@@ -27,3 +27,27 @@ public sealed class TokenResponse
     public string TenantName { get; init; } = string.Empty;
     public string Email { get; init; } = string.Empty;
 }
+
+// ── Passkey (WebAuthn) endpoints ──────────────────────────────────
+
+public sealed class BeginPasskeyRegistrationRequest
+{
+    public string DeviceLabel { get; init; } = string.Empty;
+}
+
+public sealed class CompletePasskeyRegistrationRequest
+{
+    public Fido2NetLib.AuthenticatorAttestationRawResponse? AttestationResponse { get; init; }
+    public string DeviceLabel { get; init; } = string.Empty;
+}
+
+public sealed class BeginPasskeyAuthRequest
+{
+    public string? Email { get; init; }
+}
+
+public sealed class CompletePasskeyAuthRequest
+{
+    public Fido2NetLib.AuthenticatorAssertionRawResponse? AssertionResponse { get; init; }
+    public string SessionId { get; init; } = string.Empty;
+}
